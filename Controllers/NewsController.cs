@@ -29,7 +29,7 @@ namespace newsApi.Controllers
                 image = Image.FromStream(ms);
             }
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only
-            // Read and try to change lib - as I don't know on server env this app will be deployed.
+            // Read and try to change lib - as I don't know server env this app will be deployed.
             image.Save("./Images/" + id.ToString() + fileType);
         }
     }
