@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using HtmlAgilityPack;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using newsApi.Models;
-using System.Drawing;
-using System.Text;
+using ImageMagick;
 
 namespace newsApi.Controllers
 {
@@ -13,24 +13,65 @@ namespace newsApi.Controllers
         [HttpPost]
         public IActionResult CreateNews(TestModel testmodel)
         {
-            //Console.WriteLine(testmodel.HtmlData);
-            CreateImage();
+            ParseHtml(testmodel);
             return Ok(testmodel);
         }
 
-        public void CreateImage(string strBase64, string fileType)
+        private static void ParseHtml(TestModel testmodel)
         {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(testmodel.HtmlData);
+
+            var urls = doc.DocumentNode.Descendants("img")
+                .Select(e => e.GetAttributeValue("src", null))
+                .Where(s => !string.IsNullOrEmpty(s));
+
+            var fileType = string.Empty;
+            var strBase64 = string.Empty;
+
+            foreach (var url in urls)
+            {
+                string[] split01 = url.Split(",");
+                strBase64 = split01[1];
+                if (split01[0].Contains("image"))
+                {
+                    string[] split02 = split01[0].Split("/");
+                    string[] split03 = split02[1].Split(";");
+                    fileType = split03[0];
+                }
+                SaveImage(strBase64, fileType);
+            }
+        }
+
+        private static async void SaveImage(string strBase64, string fileType)
+        {
+            Console.WriteLine("ran");
             Guid id = Guid.NewGuid();
             byte[] bytes = Convert.FromBase64String(strBase64);
 
-            Image image;
-            using (MemoryStream ms = new MemoryStream(bytes))
+            var image = new MagickImage(bytes);
+
+            switch (fileType)
             {
-                image = Image.FromStream(ms);
+                case "jpeg":
+                    image.Format = MagickFormat.Jpeg;
+                    break;
+
+                case "png":
+                    image.Format = MagickFormat.Png;
+                    break;
+
+                case "gif":
+                    image.Format = MagickFormat.Gif;
+                    break;
+
+                default:
+                    // Exit
+                    break;
             }
-            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only
-            // Read and try to change lib - as I don't know server env this app will be deployed.
-            image.Save("./Images/" + id.ToString() + fileType);
+            //var size = new MagickGeometry(maxWidth, maxHeight);
+            //image.Resize(size);
+            await image.WriteAsync($"./Images/articleImage{id}.{fileType}");
         }
     }
 }
