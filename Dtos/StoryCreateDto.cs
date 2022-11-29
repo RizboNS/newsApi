@@ -1,6 +1,8 @@
-﻿namespace newsApi.Models
+﻿using newsApi.Models;
+
+namespace newsApi.Dtos
 {
-    public class Story
+    public class StoryCreateDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -9,6 +11,5 @@
         public DateTime PublishTime { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdateTime { get; set; }
-        public List<ImageDb>? ImageDbs { get; set; }
     }
 }

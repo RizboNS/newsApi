@@ -29,8 +29,21 @@ namespace newsApi.Controllers
             var fileType = string.Empty;
             var strBase64 = string.Empty;
 
-            foreach (var url in urls)
+            //foreach (var url in urls)
+            //{
+            //    string[] split01 = url.Split(",");
+            //    strBase64 = split01[1];
+            //    if (split01[0].Contains("image"))
+            //    {
+            //        string[] split02 = split01[0].Split("/");
+            //        string[] split03 = split02[1].Split(";");
+            //        fileType = split03[0];
+            //    }
+            //    SaveImage(strBase64, fileType);
+            //}
+            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//img[@src]"))
             {
+                var url = link.Attributes["src"].Value;
                 string[] split01 = url.Split(",");
                 strBase64 = split01[1];
                 if (split01[0].Contains("image"))
@@ -70,7 +83,7 @@ namespace newsApi.Controllers
             }
             //var size = new MagickGeometry(maxWidth, maxHeight);
             //image.Resize(size);
-            await image.WriteAsync($"./Images/articleImage/{id}.{fileType}");
+            await image.WriteAsync($"./Images/articleImage{id}.{fileType}");
         }
     }
 }
