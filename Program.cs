@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
+using newsApi.Services.ImageService;
+using newsApi.Services.StoryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
+builder.Services.AddScoped<IStoryService, StoryService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddCors(
     p =>
         p.AddPolicy("corspolicy",

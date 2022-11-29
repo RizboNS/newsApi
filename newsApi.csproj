@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Images\" />
-    <Folder Include="Services\StoryService\" />
   </ItemGroup>
 
 </Project>
