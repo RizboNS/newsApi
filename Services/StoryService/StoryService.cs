@@ -62,7 +62,7 @@ namespace newsApi.Services.StoryService
                 if (response.Success == true && response.Data != null)
                 {
                     savedImages.Add(response.Data);
-
+                    // GET HOST URL and then Work on logic how files should be stored and append path to the HTML
                     att.Value = "newTestvalue";
                 }
             }

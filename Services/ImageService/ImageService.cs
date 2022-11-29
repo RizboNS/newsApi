@@ -13,8 +13,9 @@ namespace newsApi.Services.ImageService
             var imageSaveDto = new ImageSavedDto();
 
             imageSaveDto.Id = Guid.NewGuid();
-            imageSaveDto.Location = $"./Images/{imageSaveDto.Id}.{imageFileType}";
-
+            //imageSaveDto.Location = $"./Images/{imageSaveDto.Id}.{imageFileType}";
+            imageSaveDto.Location = $"./wwwroot/Images/{imageSaveDto.Id}.{imageFileType}";
+            //https://localhost:7289//Images/birdy.png
             byte[] bytes = Convert.FromBase64String(imageAsBase64);
 
             var image = new MagickImage(bytes);
