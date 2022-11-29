@@ -16,6 +16,7 @@ namespace newsApi.Services.StoryService
 
         public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto)
         {
+            Console.WriteLine("CreateStory Ran");
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
             var serviceReponse = new ServiceResponse<StoryCreatedDto>();
@@ -65,12 +66,16 @@ namespace newsApi.Services.StoryService
                     att.Value = "newTestvalue";
                 }
             }
-            //htmlDoc.Save(); TO DO SAVE USING STREAM PROBABLY
 
-            storyCreatedDto.HtmlData = "TODO";
-            storyCreatedDto.ImageSavedDtos = savedImages;
+            MemoryStream memoryStream = new MemoryStream();
+            htmlDoc.Save(memoryStream);
+            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            StreamReader streamReader = new StreamReader(memoryStream);
+
+            storyCreatedDto.HtmlData = streamReader.ReadToEnd();
+
             serviceReponse.Data = storyCreatedDto;
-
+            Console.WriteLine("CreateStory Finishing");
             return serviceReponse;
         }
     }

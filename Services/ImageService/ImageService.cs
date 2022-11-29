@@ -8,6 +8,7 @@ namespace newsApi.Services.ImageService
     {
         public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType)
         {
+            Console.WriteLine("SaveImage Ran");
             var serviceResponse = new ServiceResponse<ImageSavedDto>();
             var imageSaveDto = new ImageSavedDto();
 
@@ -47,7 +48,7 @@ namespace newsApi.Services.ImageService
                 serviceResponse.Success = false;
                 serviceResponse.Message = ex.Message;
             }
-
+            Console.WriteLine("SaveImage Finished");
             return serviceResponse;
         }
     }
