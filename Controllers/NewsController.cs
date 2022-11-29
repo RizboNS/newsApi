@@ -45,7 +45,6 @@ namespace newsApi.Controllers
 
         private static async void SaveImage(string strBase64, string fileType)
         {
-            Console.WriteLine("ran");
             Guid id = Guid.NewGuid();
             byte[] bytes = Convert.FromBase64String(strBase64);
 
@@ -71,7 +70,7 @@ namespace newsApi.Controllers
             }
             //var size = new MagickGeometry(maxWidth, maxHeight);
             //image.Resize(size);
-            await image.WriteAsync($"./Images/articleImage{id}.{fileType}");
+            await image.WriteAsync($"./Images/articleImage/{id}.{fileType}");
         }
     }
 }
