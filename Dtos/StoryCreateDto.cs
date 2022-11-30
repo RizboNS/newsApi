@@ -8,7 +8,5 @@ namespace newsApi.Dtos
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string HtmlData { get; set; } = string.Empty;
-        public DateTime CreatedTime { get; set; }
-        public DateTime UpdateTime { get; set; }
     }
 }

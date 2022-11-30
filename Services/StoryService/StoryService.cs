@@ -59,6 +59,9 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.HtmlData = streamReader.ReadToEnd();
             storyCreatedDto.Description = storyCreateDto.Description;
             storyCreatedDto.Category = storyCreateDto.Category;
+            storyCreatedDto.Title = storyCreateDto.Title;
+
+            Console.WriteLine($"created: {storyCreatedDto.CreatedTime}"); // Test = Success! :)
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;
