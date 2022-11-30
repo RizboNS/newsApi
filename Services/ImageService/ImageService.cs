@@ -6,7 +6,14 @@ namespace newsApi.Services.ImageService
 {
     public class ImageService : IImageService
     {
-        public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType)
+        private readonly IWebHostEnvironment _environment;
+
+        public ImageService(IWebHostEnvironment environment)
+        {
+            _environment = environment;
+        }
+
+        public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, string storyCategory)
         {
             Console.WriteLine("SaveImage Ran");
             var serviceResponse = new ServiceResponse<ImageSavedDto>();
@@ -14,8 +21,18 @@ namespace newsApi.Services.ImageService
 
             imageSaveDto.Id = Guid.NewGuid();
             //imageSaveDto.Location = $"./Images/{imageSaveDto.Id}.{imageFileType}";
-            imageSaveDto.Location = $"./wwwroot/Images/{imageSaveDto.Id}.{imageFileType}";
+            //imageSaveDto.Location = $"./wwwroot/Images/{imageSaveDto.Id}.{imageFileType}";
             //https://localhost:7289//Images/birdy.png
+            var fileName = imageSaveDto.Id + "." + imageFileType;
+            var filePath = GetFilePath(storyId, storyCategory);
+
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            var fullPath = $"{filePath}\\{fileName}";
+
             byte[] bytes = Convert.FromBase64String(imageAsBase64);
 
             var image = new MagickImage(bytes);
@@ -40,7 +57,8 @@ namespace newsApi.Services.ImageService
             }
             try
             {
-                await image.WriteAsync(imageSaveDto.Location);
+                await image.WriteAsync(fullPath);
+                imageSaveDto.Location = GetPartialPath(storyId, storyCategory) + "\\" + fileName;
                 serviceResponse.Data = imageSaveDto;
                 serviceResponse.Success = true;
             }
@@ -51,6 +69,16 @@ namespace newsApi.Services.ImageService
             }
             Console.WriteLine("SaveImage Finished");
             return serviceResponse;
+        }
+
+        private string GetFilePath(Guid storyId, string storyCategory)
+        {
+            return _environment.WebRootPath + "\\Images\\Story\\" + storyCategory + "\\" + storyId;
+        }
+
+        private string GetPartialPath(Guid storyId, string storyCategory)
+        {
+            return "\\Images\\Story\\" + storyCategory + "\\" + storyId;
         }
     }
 }

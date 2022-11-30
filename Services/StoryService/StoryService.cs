@@ -21,6 +21,7 @@ namespace newsApi.Services.StoryService
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
             var serviceReponse = new ServiceResponse<StoryCreatedDto>();
             var storyCreatedDto = new StoryCreatedDto();
+            storyCreatedDto.Id = Guid.NewGuid();
             var savedImages = new List<ImageSavedDto>();
 
             var urls = htmlDoc.DocumentNode.Descendants("img")
@@ -30,22 +31,6 @@ namespace newsApi.Services.StoryService
             var imageFileType = string.Empty;
             var imageAsBase64 = string.Empty;
 
-            //foreach (var url in urls)
-            //{
-            //    string[] split01 = url.Split(",");
-            //    imageAsBase64 = split01[1];
-            //    if (split01[0].Contains("image"))
-            //    {
-            //        string[] split02 = split01[0].Split("/");
-            //        string[] split03 = split02[1].Split(";");
-            //        imageFileType = split03[0];
-            //    }
-            //    var response = await _imageService.SaveImage(imageAsBase64, imageFileType);
-            //    if (response.Success == true && response.Data != null)
-            //    {
-            //        savedImages.Add(response.Data);
-            //    }
-            //}
             foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
             {
                 HtmlAttribute att = link.Attributes["src"];
@@ -58,12 +43,12 @@ namespace newsApi.Services.StoryService
                     string[] split03 = split02[1].Split(";");
                     imageFileType = split03[0];
                 }
-                var response = await _imageService.SaveImage(imageAsBase64, imageFileType);
+                var response = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
                 if (response.Success == true && response.Data != null)
                 {
                     savedImages.Add(response.Data);
-                    // GET HOST URL and then Work on logic how files should be stored and append path to the HTML
-                    att.Value = "newTestvalue";
+                    // GET HOST URL and Replace static one
+                    att.Value = "https:\\localhost:7289" + response.Data.Location;
                 }
             }
 
