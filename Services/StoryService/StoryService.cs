@@ -14,9 +14,8 @@ namespace newsApi.Services.StoryService
             _imageService = imageService;
         }
 
-        public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto)
+        public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
         {
-            Console.WriteLine("CreateStory Ran");
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
             var serviceReponse = new ServiceResponse<StoryCreatedDto>();
@@ -47,8 +46,8 @@ namespace newsApi.Services.StoryService
                 if (response.Success == true && response.Data != null)
                 {
                     savedImages.Add(response.Data);
-                    // GET HOST URL and Replace static one
-                    att.Value = "https:\\localhost:7289" + response.Data.Location;
+
+                    att.Value = domainName + response.Data.Location;
                 }
             }
 
@@ -60,7 +59,6 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.HtmlData = streamReader.ReadToEnd();
 
             serviceReponse.Data = storyCreatedDto;
-            Console.WriteLine("CreateStory Finishing");
             return serviceReponse;
         }
     }

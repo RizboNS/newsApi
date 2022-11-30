@@ -20,9 +20,7 @@ namespace newsApi.Services.ImageService
             var imageSaveDto = new ImageSavedDto();
 
             imageSaveDto.Id = Guid.NewGuid();
-            //imageSaveDto.Location = $"./Images/{imageSaveDto.Id}.{imageFileType}";
-            //imageSaveDto.Location = $"./wwwroot/Images/{imageSaveDto.Id}.{imageFileType}";
-            //https://localhost:7289//Images/birdy.png
+
             var fileName = imageSaveDto.Id + "." + imageFileType;
             var filePath = GetFilePath(storyId, storyCategory);
 
@@ -78,7 +76,7 @@ namespace newsApi.Services.ImageService
 
         private string GetPartialPath(Guid storyId, string storyCategory)
         {
-            return "\\Images\\Story\\" + storyCategory + "\\" + storyId;
+            return "Images\\Story\\" + storyCategory + "\\" + storyId;
         }
     }
 }

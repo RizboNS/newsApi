@@ -20,7 +20,9 @@ namespace newsApi.Controllers
         public async Task<IActionResult> CreateStory(StoryCreateDto storyCreateDto)
         {
             Console.WriteLine("CreateStoryController ran");
-            return Ok(await _storyService.CreateStory(storyCreateDto));
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+
+            return Ok(await _storyService.CreateStory(storyCreateDto, domainName));
         }
     }
 }
