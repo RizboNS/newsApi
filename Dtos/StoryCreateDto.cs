@@ -4,13 +4,11 @@ namespace newsApi.Dtos
 {
     public class StoryCreateDto
     {
-        public string Name { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string HtmlData { get; set; } = string.Empty;
-        public bool Publish { get; set; } = false;
-        //public DateTime PublishTime { get; set; }
-        //public DateTime CreatedTime { get; set; }
-        //public DateTime UpdateTime { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime UpdateTime { get; set; }
     }
 }

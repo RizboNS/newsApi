@@ -53,10 +53,12 @@ namespace newsApi.Services.StoryService
 
             MemoryStream memoryStream = new MemoryStream();
             htmlDoc.Save(memoryStream);
-            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            memoryStream.Seek(0, SeekOrigin.Begin);
             StreamReader streamReader = new StreamReader(memoryStream);
 
             storyCreatedDto.HtmlData = streamReader.ReadToEnd();
+            storyCreatedDto.Description = storyCreateDto.Description;
+            storyCreatedDto.Category = storyCreateDto.Category;
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;

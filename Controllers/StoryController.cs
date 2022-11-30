@@ -19,7 +19,6 @@ namespace newsApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateStory(StoryCreateDto storyCreateDto)
         {
-            Console.WriteLine("CreateStoryController ran");
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
 
             return Ok(await _storyService.CreateStory(storyCreateDto, domainName));
