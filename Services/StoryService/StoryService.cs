@@ -1,4 +1,6 @@
-﻿using HtmlAgilityPack;
+﻿using AutoMapper;
+using HtmlAgilityPack;
+using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
 using newsApi.Services.ImageService;
@@ -8,10 +10,15 @@ namespace newsApi.Services.StoryService
     public class StoryService : IStoryService
     {
         private readonly IImageService _imageService;
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public StoryService(IImageService imageService)
+        public StoryService(
+            IImageService imageService, DataContext context, IMapper mapper)
         {
             _imageService = imageService;
+            _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
@@ -22,11 +29,6 @@ namespace newsApi.Services.StoryService
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
             var savedImages = new List<ImageSavedDto>();
-
-            var urls = htmlDoc.DocumentNode.Descendants("img")
-                .Select(e => e.GetAttributeValue("src", null))
-                .Where(s => !string.IsNullOrEmpty(s));
-
             var imageFileType = string.Empty;
             var imageAsBase64 = string.Empty;
 
@@ -61,6 +63,9 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.Category = storyCreateDto.Category;
             storyCreatedDto.Title = storyCreateDto.Title;
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
+
+            Story story = _mapper.Map<Story>(storyCreatedDto);
+            Console.WriteLine(story.Id);
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;
