@@ -7,6 +7,6 @@
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string HtmlData { get; set; } = string.Empty;
-        public DateTime CreatedTime { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time")); // Test = Success :)
+        public DateTime PublishTime { get; set; }
     }
 }

@@ -60,8 +60,7 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.Description = storyCreateDto.Description;
             storyCreatedDto.Category = storyCreateDto.Category;
             storyCreatedDto.Title = storyCreateDto.Title;
-
-            Console.WriteLine($"created: {storyCreatedDto.CreatedTime}"); // Test = Success! :)
+            storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;
