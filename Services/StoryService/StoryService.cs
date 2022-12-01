@@ -29,27 +29,27 @@ namespace newsApi.Services.StoryService
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
             var savedImages = new List<ImageSavedDto>();
-            var imageFileType = string.Empty;
-            var imageAsBase64 = string.Empty;
 
             foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
             {
                 HtmlAttribute att = link.Attributes["src"];
                 var url = att.Value;
                 string[] split01 = url.Split(",");
-                imageAsBase64 = split01[1];
+                var imageAsBase64 = split01[1];
+                var imageFileType = string.Empty;
                 if (split01[0].Contains("image"))
                 {
                     string[] split02 = split01[0].Split("/");
                     string[] split03 = split02[1].Split(";");
                     imageFileType = split03[0];
                 }
-                var response = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
-                if (response.Success == true && response.Data != null)
+                var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
+                if (res.Success == true && res.Data != null)
                 {
-                    savedImages.Add(response.Data);
+                    res.Data.Location = domainName + res.Data.Location;
+                    savedImages.Add(res.Data);
 
-                    att.Value = domainName + response.Data.Location;
+                    att.Value = res.Data.Location;
                 }
             }
 
@@ -65,7 +65,25 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
 
             Story story = _mapper.Map<Story>(storyCreatedDto);
-            Console.WriteLine(story.Id);
+
+            try
+            {
+                _context.Add(story);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                serviceReponse.Success = false;
+                serviceReponse.Message = ex.Message;
+            }
+
+            var response = await _imageService.CreateImages(savedImages, storyCreatedDto.Id);
+            if (!response.Success)
+            {
+                serviceReponse.Success = response.Success;
+                serviceReponse.Message = response.Message;
+                return serviceReponse;
+            }
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;

@@ -9,6 +9,7 @@ namespace newsApi
         public AutoMapperProfile()
         {
             CreateMap<StoryCreatedDto, Story>();
+            CreateMap<ImageSavedDto, ImageDb>();
         }
     }
 }
