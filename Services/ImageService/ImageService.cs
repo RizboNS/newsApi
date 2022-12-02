@@ -89,7 +89,7 @@ namespace newsApi.Services.ImageService
             try
             {
                 await image.WriteAsync(fullPath);
-                imageSaveDto.Location = GetPartialPath(storyId, storyCategory) + "/" + fileName;
+                imageSaveDto.LocationPath = GetPartialPath(storyId, storyCategory) + "/" + fileName;
                 serviceResponse.Data = imageSaveDto;
                 serviceResponse.Success = true;
             }

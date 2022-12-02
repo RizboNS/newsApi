@@ -46,10 +46,10 @@ namespace newsApi.Services.StoryService
                 var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
                 if (res.Success == true && res.Data != null)
                 {
-                    res.Data.Location = domainName + res.Data.Location;
+                    res.Data.LocationDomain = domainName;
                     savedImages.Add(res.Data);
 
-                    att.Value = res.Data.Location;
+                    att.Value = res.Data.LocationDomain + res.Data.LocationPath;
                 }
             }
 
@@ -87,6 +87,11 @@ namespace newsApi.Services.StoryService
 
             serviceReponse.Data = storyCreatedDto;
             return serviceReponse;
+        }
+
+        public Task<ServiceResponse<Story>> GetStories()
+        {
+            throw new NotImplementedException();
         }
     }
 }
