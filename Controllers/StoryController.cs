@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using newsApi.Dtos;
+using newsApi.Models;
 using newsApi.Services.StoryService;
 
 namespace newsApi.Controllers
@@ -28,6 +29,22 @@ namespace newsApi.Controllers
         public async Task<IActionResult> GetStories()
         {
             return Ok(await _storyService.GetStories());
+        }
+
+        [HttpGet("storyId")]
+        public async Task<IActionResult> GetStory(Guid storyId)
+        {
+            var response = await _storyService.GetStory(storyId);
+
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            else if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }

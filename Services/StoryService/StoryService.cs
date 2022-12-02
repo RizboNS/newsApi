@@ -93,11 +93,53 @@ namespace newsApi.Services.StoryService
         public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories()
         {
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
+            try
+            {
+                var stories = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .ToListAsync();
 
-            var stories = await _context.Stories.ToListAsync();
+                serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
 
-            serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
-            // TO DO fetch all Images from DB and append to the list (images).
+            return serviceResponse;
+        }
+
+        public Task<ServiceResponse<List<StoryResponseDto>>> GetStoriesByCategory(Category category)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId)
+        {
+            var serviceResponse = new ServiceResponse<StoryResponseDto>();
+
+            try
+            {
+                var story = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .FirstOrDefaultAsync(s => s.Id == storyId);
+
+                if (story == null)
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Story not found.";
+                    return serviceResponse;
+                }
+
+                serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+
             return serviceResponse;
         }
     }

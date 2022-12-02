@@ -47,7 +47,7 @@ namespace newsApi.Services.ImageService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, string storyCategory)
+        public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, Category storyCategory)
         {
             var serviceResponse = new ServiceResponse<ImageSavedDto>();
             var imageSaveDto = new ImageSavedDto();
@@ -55,7 +55,7 @@ namespace newsApi.Services.ImageService
             imageSaveDto.Id = Guid.NewGuid();
 
             var fileName = imageSaveDto.Id + "." + imageFileType;
-            var filePath = GetFilePath(storyId, storyCategory);
+            var filePath = GetFilePath(storyId, storyCategory.ToString());
 
             if (!Directory.Exists(filePath))
             {
@@ -89,7 +89,7 @@ namespace newsApi.Services.ImageService
             try
             {
                 await image.WriteAsync(fullPath);
-                imageSaveDto.LocationPath = GetPartialPath(storyId, storyCategory) + "/" + fileName;
+                imageSaveDto.LocationPath = GetPartialPath(storyId, storyCategory.ToString()) + "/" + fileName;
                 serviceResponse.Data = imageSaveDto;
                 serviceResponse.Success = true;
             }
