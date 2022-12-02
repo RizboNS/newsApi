@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
@@ -89,9 +90,15 @@ namespace newsApi.Services.StoryService
             return serviceReponse;
         }
 
-        public Task<ServiceResponse<Story>> GetStories()
+        public async Task<ServiceResponse<List<Story>>> GetStories()
         {
-            throw new NotImplementedException();
+            var serviceResponse = new ServiceResponse<List<Story>>();
+
+            var stories = await _context.Stories.ToListAsync();
+
+            serviceResponse.Data = stories;
+
+            return serviceResponse;
         }
     }
 }

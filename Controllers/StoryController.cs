@@ -23,5 +23,11 @@ namespace newsApi.Controllers
 
             return Ok(await _storyService.CreateStory(storyCreateDto, domainName));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetStories()
+        {
+            return Ok(await _storyService.GetStories());
+        }
     }
 }
