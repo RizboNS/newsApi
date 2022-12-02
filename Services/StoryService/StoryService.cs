@@ -90,14 +90,14 @@ namespace newsApi.Services.StoryService
             return serviceReponse;
         }
 
-        public async Task<ServiceResponse<List<Story>>> GetStories()
+        public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories()
         {
-            var serviceResponse = new ServiceResponse<List<Story>>();
+            var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
 
             var stories = await _context.Stories.ToListAsync();
 
-            serviceResponse.Data = stories;
-
+            serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
+            // TO DO fetch all Images from DB and append to the list (images).
             return serviceResponse;
         }
     }

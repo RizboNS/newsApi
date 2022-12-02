@@ -10,6 +10,7 @@ namespace newsApi
         {
             CreateMap<StoryCreatedDto, Story>();
             CreateMap<ImageSavedDto, ImageDb>();
+            CreateMap<Story, StoryResponseDto>();
         }
     }
 }
