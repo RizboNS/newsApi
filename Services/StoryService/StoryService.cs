@@ -26,7 +26,7 @@ namespace newsApi.Services.StoryService
         {
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
-            var serviceReponse = new ServiceResponse<StoryCreatedDto>();
+            var serviceResponse = new ServiceResponse<StoryCreatedDto>();
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
             var savedImages = new List<ImageSavedDto>();
@@ -36,21 +36,30 @@ namespace newsApi.Services.StoryService
                 HtmlAttribute att = link.Attributes["src"];
                 var url = att.Value;
                 string[] split01 = url.Split(",");
-                var imageAsBase64 = split01[1];
-                var imageFileType = string.Empty;
-                if (split01[0].Contains("image"))
+                if (split01.Length > 1)
                 {
-                    string[] split02 = split01[0].Split("/");
-                    string[] split03 = split02[1].Split(";");
-                    imageFileType = split03[0];
-                }
-                var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
-                if (res.Success == true && res.Data != null)
-                {
-                    res.Data.LocationDomain = domainName;
-                    savedImages.Add(res.Data);
+                    var imageAsBase64 = split01[1];
+                    var imageFileType = string.Empty;
+                    if (split01[0].Contains("image"))
+                    {
+                        string[] split02 = split01[0].Split("/");
+                        string[] split03 = split02[1].Split(";");
+                        imageFileType = split03[0];
+                    }
+                    var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
+                    if (res.Success == true && res.Data != null)
+                    {
+                        res.Data.LocationDomain = domainName;
+                        savedImages.Add(res.Data);
 
-                    att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                        att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                    }
+                }
+                else
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Invalid image fromat.";
+                    return serviceResponse;
                 }
             }
 
@@ -74,20 +83,20 @@ namespace newsApi.Services.StoryService
             }
             catch (Exception ex)
             {
-                serviceReponse.Success = false;
-                serviceReponse.Message = ex.Message;
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
             }
 
             var response = await _imageService.CreateImages(savedImages, storyCreatedDto.Id);
             if (!response.Success)
             {
-                serviceReponse.Success = response.Success;
-                serviceReponse.Message = response.Message;
-                return serviceReponse;
+                serviceResponse.Success = response.Success;
+                serviceResponse.Message = response.Message;
+                return serviceResponse;
             }
 
-            serviceReponse.Data = storyCreatedDto;
-            return serviceReponse;
+            serviceResponse.Data = storyCreatedDto;
+            return serviceResponse;
         }
 
         public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories()
@@ -138,6 +147,59 @@ namespace newsApi.Services.StoryService
             {
                 serviceResponse.Success = false;
                 serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
+
+        public async Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName)
+        {
+            var serviceResponse = new ServiceResponse<StoryResponseDto>();
+            var story = await _context.Stories.FindAsync(storyUpdateDto.Id);
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(storyUpdateDto.HtmlData);
+            var savedImages = new List<ImageSavedDto>();
+
+            foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
+            {
+                HtmlAttribute att = link.Attributes["src"];
+                var url = att.Value;
+                string[] split01 = url.Split(",");
+                if (split01.Length > 1)
+                {
+                    var imageAsBase64 = split01[1];
+                    var imageFileType = string.Empty;
+                    if (split01[0].Contains("image"))
+                    {
+                        string[] split02 = split01[0].Split("/");
+                        string[] split03 = split02[1].Split(";");
+                        imageFileType = split03[0];
+                    }
+                    var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
+                    if (res.Success == true && res.Data != null)
+                    {
+                        res.Data.LocationDomain = domainName;
+                        savedImages.Add(res.Data);
+
+                        att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                    }
+                }
+                else
+                {
+                    // TASK
+                    // Check if image exist on this server, if not exist download it and save it to this server.
+                    Console.WriteLine(url);
+                    Console.WriteLine(domainName);
+
+                    var requestDomain = url.Split("/")[2];
+                    var domain = domainName.Split("/")[2];
+                    Console.WriteLine(requestDomain);
+                    Console.WriteLine(domain);
+                    // Compare if domains match - if not check on server for existing image - if exists do nothing - if not upload it
+                    // if not exists on server download it from the link and then upload it.
+                    // change HTML body etc.
+                }
             }
 
             return serviceResponse;

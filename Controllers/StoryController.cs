@@ -21,8 +21,12 @@ namespace newsApi.Controllers
         public async Task<IActionResult> CreateStory(StoryCreateDto storyCreateDto)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
-
-            return Ok(await _storyService.CreateStory(storyCreateDto, domainName));
+            var serviceResponse = await _storyService.CreateStory(storyCreateDto, domainName);
+            if (!serviceResponse.Success)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
 
         [HttpGet]
@@ -31,9 +35,10 @@ namespace newsApi.Controllers
             return Ok(await _storyService.GetStories());
         }
 
-        [HttpGet("storyId")]
+        [HttpGet("{storyId}")]
         public async Task<IActionResult> GetStory(Guid storyId)
         {
+            Console.WriteLine("ran");
             var response = await _storyService.GetStory(storyId);
 
             if (response.Data == null)
@@ -45,6 +50,13 @@ namespace newsApi.Controllers
                 return BadRequest(response);
             }
             return Ok(response);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateStory(StoryUpdateDto storyUpdateDto)
+        {
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            return Ok(await _storyService.UpdateStory(storyUpdateDto, domainName));
         }
     }
 }

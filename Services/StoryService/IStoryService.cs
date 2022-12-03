@@ -12,5 +12,7 @@ namespace newsApi.Services.StoryService
         Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId);
 
         Task<ServiceResponse<List<StoryResponseDto>>> GetStoriesByCategory(Category category);
+
+        Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName);
     }
 }
