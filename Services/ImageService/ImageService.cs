@@ -3,6 +3,7 @@ using ImageMagick;
 using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
+using System.Net;
 
 namespace newsApi.Services.ImageService
 {
@@ -11,6 +12,7 @@ namespace newsApi.Services.ImageService
         private readonly IWebHostEnvironment _environment;
         private readonly IMapper _mapper;
         private readonly DataContext _context;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public ImageService(IWebHostEnvironment environment, IMapper mapper, DataContext context)
         {
@@ -47,6 +49,26 @@ namespace newsApi.Services.ImageService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<string>> DownloadImageToBase64(string url)
+        {
+            var serviceResponse = new ServiceResponse<string>();
+            var base64String = string.Empty;
+
+            try
+            {
+                byte[] fileBytes = await _httpClient.GetByteArrayAsync(url);
+                base64String = Convert.ToBase64String(fileBytes);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            serviceResponse.Data = base64String;
+            return serviceResponse;
+        }
+
         public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, Category storyCategory)
         {
             var serviceResponse = new ServiceResponse<ImageSavedDto>();
@@ -54,7 +76,7 @@ namespace newsApi.Services.ImageService
 
             imageSaveDto.Id = Guid.NewGuid();
 
-            var fileName = imageSaveDto.Id + "." + imageFileType;
+            var fileName = imageFileType.Contains('.') ? imageSaveDto.Id + imageFileType : imageSaveDto.Id + "." + imageFileType;
             var filePath = GetFilePath(storyId, storyCategory.ToString());
 
             if (!Directory.Exists(filePath))
@@ -110,6 +132,13 @@ namespace newsApi.Services.ImageService
         private string GetPartialPath(Guid storyId, string storyCategory)
         {
             return "Images/Story/" + storyCategory + "/" + storyId;
+        }
+
+        public string GetFileExtension(string url)
+        {
+            url = url.Split('?')[0];
+            url = url.Split('/').Last();
+            return url.Contains('.') ? url.Substring(url.LastIndexOf('.')) : "";
         }
     }
 }

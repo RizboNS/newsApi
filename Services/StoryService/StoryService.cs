@@ -189,16 +189,36 @@ namespace newsApi.Services.StoryService
                 {
                     // TASK
                     // Check if image exist on this server, if not exist download it and save it to this server.
-                    Console.WriteLine(url);
-                    Console.WriteLine(domainName);
 
                     var requestDomain = url.Split("/")[2];
                     var domain = domainName.Split("/")[2];
-                    Console.WriteLine(requestDomain);
-                    Console.WriteLine(domain);
                     // Compare if domains match - if not check on server for existing image - if exists do nothing - if not upload it
                     // if not exists on server download it from the link and then upload it.
                     // change HTML body etc.
+
+                    if (!File.Exists(url))
+                    {
+                        Console.WriteLine("running");
+                        var resDownload = await _imageService.DownloadImageToBase64(url);
+                        if (resDownload.Data == null)
+                        {
+                            serviceResponse.Success = false;
+                            serviceResponse.Message = resDownload.Message;
+                            return serviceResponse;
+                        }
+
+                        var imageAsBase64 = resDownload.Data;
+                        var imageFileType = _imageService.GetFileExtension(url);
+
+                        var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
+                        if (res.Success == true && res.Data != null)
+                        {
+                            res.Data.LocationDomain = domainName;
+                            savedImages.Add(res.Data);
+
+                            att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                        }
+                    }
                 }
             }
 
