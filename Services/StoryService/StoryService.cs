@@ -187,18 +187,14 @@ namespace newsApi.Services.StoryService
                 }
                 else
                 {
-                    // TASK
-                    // Check if image exist on this server, if not exist download it and save it to this server.
+                    var urlHost = new Uri(url).Host;
+                    var localHost = new Uri(domainName).Host;
+                    var urlLocalPath = new Uri(url).LocalPath;
 
-                    var requestDomain = url.Split("/")[2];
-                    var domain = domainName.Split("/")[2];
-                    // Compare if domains match - if not check on server for existing image - if exists do nothing - if not upload it
-                    // if not exists on server download it from the link and then upload it.
-                    // change HTML body etc.
-
-                    if (!File.Exists(url))
+                    if (!File.Exists(url) ||
+                        !urlHost.Equals(localHost) && !File.Exists(localHost + "/" + urlLocalPath)
+                        )
                     {
-                        Console.WriteLine("running");
                         var resDownload = await _imageService.DownloadImageToBase64(url);
                         if (resDownload.Data == null)
                         {
@@ -221,8 +217,21 @@ namespace newsApi.Services.StoryService
                     }
                 }
             }
+            savedImages.ForEach(img => Console.Write($"img.locDom: ,{img.LocationDomain}, img.LocPath: {img.LocationPath}, img.id: {img.Id}, img.StoryId: {img.StoryId}"));
 
+            // TO DO
+            // Map Updated story to > storyoutput
+            // Update DB
+            // Send response
+            // On front update view with new Story to prevent oversaving the server.
             return serviceResponse;
         }
     }
 }
+
+//UPDATE
+
+//URL Could be outside of server - Download and Save - OK
+//URL Could be from server (already exist) -Do nothing
+//URL Could be from server but with old domain ( already exists ) -Update domain to current one
+//URL Could be Encoded already (new image) -Save - OK
