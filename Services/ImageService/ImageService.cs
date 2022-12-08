@@ -28,12 +28,16 @@ namespace newsApi.Services.ImageService
 
             try
             {
-                images.ForEach(image =>
+                images.ForEach(async image =>
                 {
-                    ImageDb imageDb = _mapper.Map<ImageDb>(image);
-                    imageDb.StoryId = storyId;
-                    _context.Add(imageDb);
-                    imageDbs.Add(imageDb);
+                    var imageInDb = await _context.ImageDbs.FindAsync(image.Id);
+                    if (imageInDb == null)
+                    {
+                        ImageDb imageDb = _mapper.Map<ImageDb>(image);
+                        imageDb.StoryId = storyId;
+                        _context.Add(imageDb);
+                        imageDbs.Add(imageDb);
+                    }
                 });
 
                 await _context.SaveChangesAsync();

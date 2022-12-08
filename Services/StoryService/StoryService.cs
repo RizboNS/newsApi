@@ -10,13 +10,15 @@ namespace newsApi.Services.StoryService
 {
     public class StoryService : IStoryService
     {
+        private readonly IWebHostEnvironment _environment;
         private readonly IImageService _imageService;
         private readonly DataContext _context;
         private readonly IMapper _mapper;
 
-        public StoryService(
+        public StoryService(IWebHostEnvironment environment,
             IImageService imageService, DataContext context, IMapper mapper)
         {
+            _environment = environment;
             _imageService = imageService;
             _context = context;
             _mapper = mapper;
@@ -156,6 +158,12 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponseDto>();
             var story = await _context.Stories.FindAsync(storyUpdateDto.Id);
+            if (story == null)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Story not found.";
+                return serviceResponse;
+            }
 
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyUpdateDto.HtmlData);
@@ -190,10 +198,9 @@ namespace newsApi.Services.StoryService
                     var urlHost = new Uri(url).Host;
                     var localHost = new Uri(domainName).Host;
                     var urlLocalPath = new Uri(url).LocalPath;
-
-                    if (!File.Exists(url) ||
-                        !urlHost.Equals(localHost) && !File.Exists(localHost + "/" + urlLocalPath)
-                        )
+                    var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
+                    // IF urlHOST AND localHOST are not equals and serverPath exists then change domain in the url and update DB and HTML
+                    if (!File.Exists(serverPath))
                     {
                         var resDownload = await _imageService.DownloadImageToBase64(url);
                         if (resDownload.Data == null)
@@ -217,13 +224,38 @@ namespace newsApi.Services.StoryService
                     }
                 }
             }
-            savedImages.ForEach(img => Console.Write($"img.locDom: ,{img.LocationDomain}, img.LocPath: {img.LocationPath}, img.id: {img.Id}, img.StoryId: {img.StoryId}"));
 
-            // TO DO
-            // Map Updated story to > storyoutput
-            // Update DB
-            // Send response
-            // On front update view with new Story to prevent oversaving the server.
+            MemoryStream memoryStream = new MemoryStream();
+            htmlDoc.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            StreamReader streamReader = new StreamReader(memoryStream);
+
+            story.HtmlData = streamReader.ReadToEnd();
+            story.Description = storyUpdateDto.Description;
+            story.Category = storyUpdateDto.Category;
+            story.Title = storyUpdateDto.Title;
+            story.PublishTime = storyUpdateDto.PublishTime;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                StoryResponseDto storyResponseDto = _mapper.Map<StoryResponseDto>(story);
+                serviceResponse.Data = storyResponseDto;
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            var response = await _imageService.CreateImages(savedImages, story.Id);
+            if (!response.Success)
+            {
+                serviceResponse.Success = response.Success;
+                serviceResponse.Message = response.Message;
+                return serviceResponse;
+            }
+
             return serviceResponse;
         }
     }
