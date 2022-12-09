@@ -26,6 +26,7 @@ namespace newsApi.Services.StoryService
 
         public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
         {
+            // Add option to insert image from a link (similar to the method in update story).
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
             var serviceResponse = new ServiceResponse<StoryCreatedDto>();
@@ -157,62 +158,45 @@ namespace newsApi.Services.StoryService
         public async Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponseDto>();
-            var story = await _context.Stories.FindAsync(storyUpdateDto.Id);
+            var story = await _context.Stories
+                .Include(s => s.ImageDbs)
+                .FirstOrDefaultAsync(s => s.Id == storyUpdateDto.Id);
             if (story == null)
             {
                 serviceResponse.Success = false;
                 serviceResponse.Message = "Story not found.";
                 return serviceResponse;
             }
+            var htmlDocOld = new HtmlDocument();
+            htmlDocOld.LoadHtml(story.HtmlData);
 
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyUpdateDto.HtmlData);
+
             var savedImages = new List<ImageSavedDto>();
 
-            foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
+            var imgNodesOld = htmlDocOld.DocumentNode.SelectNodes("//img[@src]");
+            var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
+
+            CompareHtmls(imgNodesOld, imgNodes, story);
+
+            if (imgNodes != null)
             {
-                HtmlAttribute att = link.Attributes["src"];
-                var url = att.Value;
-                string[] split01 = url.Split(",");
-                if (split01.Length > 1)
+                foreach (HtmlNode link in imgNodes)
                 {
-                    var imageAsBase64 = split01[1];
-                    var imageFileType = string.Empty;
-                    if (split01[0].Contains("image"))
+                    HtmlAttribute att = link.Attributes["src"];
+                    var url = att.Value;
+                    string[] split01 = url.Split(",");
+                    if (split01.Length > 1)
                     {
-                        string[] split02 = split01[0].Split("/");
-                        string[] split03 = split02[1].Split(";");
-                        imageFileType = split03[0];
-                    }
-                    var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
-                    if (res.Success == true && res.Data != null)
-                    {
-                        res.Data.LocationDomain = domainName;
-                        savedImages.Add(res.Data);
-
-                        att.Value = res.Data.LocationDomain + res.Data.LocationPath;
-                    }
-                }
-                else
-                {
-                    var urlHost = new Uri(url).Host;
-                    var localHost = new Uri(domainName).Host;
-                    var urlLocalPath = new Uri(url).LocalPath;
-                    var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
-                    // IF urlHOST AND localHOST are not equals and serverPath exists then change domain in the url and update DB and HTML
-                    if (!File.Exists(serverPath))
-                    {
-                        var resDownload = await _imageService.DownloadImageToBase64(url);
-                        if (resDownload.Data == null)
+                        var imageAsBase64 = split01[1];
+                        var imageFileType = string.Empty;
+                        if (split01[0].Contains("image"))
                         {
-                            serviceResponse.Success = false;
-                            serviceResponse.Message = resDownload.Message;
-                            return serviceResponse;
+                            string[] split02 = split01[0].Split("/");
+                            string[] split03 = split02[1].Split(";");
+                            imageFileType = split03[0];
                         }
-
-                        var imageAsBase64 = resDownload.Data;
-                        var imageFileType = _imageService.GetFileExtension(url);
-
                         var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
                         if (res.Success == true && res.Data != null)
                         {
@@ -220,6 +204,36 @@ namespace newsApi.Services.StoryService
                             savedImages.Add(res.Data);
 
                             att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                        }
+                    }
+                    else
+                    {
+                        var urlHost = new Uri(url).Host;
+                        var localHost = new Uri(domainName).Host;
+                        var urlLocalPath = new Uri(url).LocalPath;
+                        var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
+                        // IF urlHOST AND localHOST are not equals and serverPath exists then change domain in the url and update DB and HTML
+                        if (!File.Exists(serverPath))
+                        {
+                            var resDownload = await _imageService.DownloadImageToBase64(url);
+                            if (resDownload.Data == null)
+                            {
+                                serviceResponse.Success = false;
+                                serviceResponse.Message = resDownload.Message;
+                                return serviceResponse;
+                            }
+
+                            var imageAsBase64 = resDownload.Data;
+                            var imageFileType = _imageService.GetFileExtension(url);
+
+                            var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
+                            if (res.Success == true && res.Data != null)
+                            {
+                                res.Data.LocationDomain = domainName;
+                                savedImages.Add(res.Data);
+
+                                att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                            }
                         }
                     }
                 }
@@ -257,6 +271,46 @@ namespace newsApi.Services.StoryService
             }
 
             return serviceResponse;
+        }
+
+        private async void CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc, Story story)
+        {
+            foreach (var imageDb in story.ImageDbs)
+            {
+                Console.WriteLine(imageDb.LocationPath);
+            }
+            if (oldDoc == null)
+            {
+                return;
+            }
+            if (newDoc == null)
+            {
+                Console.WriteLine("Delete all images in old doc");
+                return;
+            }
+
+            foreach (var linkOld in oldDoc)
+            {
+                var urlOld = linkOld.Attributes["src"].Value;
+                var urlFound = false;
+                foreach (var linkNew in newDoc)
+                {
+                    var urlNew = linkNew.Attributes["src"].Value;
+                    if (urlNew == urlOld)
+                    {
+                        urlFound = true;
+                    }
+                }
+                if (!urlFound)
+                {
+                    Console.WriteLine($"Delete: {urlOld}");
+                    Uri uri = new Uri(urlOld);
+                    var file = Path.GetFileName(uri.LocalPath);
+                    var fileId = new Guid(file.Split(".")[0]);
+                    Console.WriteLine($"Delete {fileId} from DB and System");
+                    await _imageService.DeleteImage(fileId);
+                }
+            }
         }
     }
 }

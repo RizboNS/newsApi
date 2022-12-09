@@ -28,7 +28,7 @@ namespace newsApi.Services.ImageService
 
             try
             {
-                images.ForEach(async image =>
+                foreach (var image in images)
                 {
                     var imageInDb = await _context.ImageDbs.FindAsync(image.Id);
                     if (imageInDb == null)
@@ -38,7 +38,7 @@ namespace newsApi.Services.ImageService
                         _context.Add(imageDb);
                         imageDbs.Add(imageDb);
                     }
-                });
+                }
 
                 await _context.SaveChangesAsync();
             }
@@ -143,6 +143,67 @@ namespace newsApi.Services.ImageService
             url = url.Split('?')[0];
             url = url.Split('/').Last();
             return url.Contains('.') ? url.Substring(url.LastIndexOf('.')) : "";
+        }
+
+        public async Task<ServiceResponse<bool>> DeleteImage(Guid imageId)
+        {
+            var serviceResponse = new ServiceResponse<bool>();
+            var imageToDelete = await _context.ImageDbs.FindAsync(imageId);
+            try
+            {
+                if (imageToDelete != null)
+                {
+                    var methodResponse = deleteFromSystem(imageToDelete.LocationPath);
+                    if (methodResponse.Success)
+                    {
+                        _context.ImageDbs.Remove(imageToDelete);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        serviceResponse.Success = false;
+                        serviceResponse.Message = methodResponse.Message;
+                    }
+                }
+                else
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Image not found.";
+                    serviceResponse.Data = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+                serviceResponse.Data = false;
+            }
+
+            return serviceResponse;
+        }
+
+        private MethodResponse deleteFromSystem(string imagePath)
+        {
+            var methodResponse = new MethodResponse();
+            try
+            {
+                var fileToDelete = _environment.WebRootPath + "/" + imagePath;
+                if (File.Exists(fileToDelete))
+                {
+                    File.Delete(fileToDelete);
+                }
+                else
+                {
+                    methodResponse.Success = false;
+                    methodResponse.Message = "File does not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                methodResponse.Success = false;
+                methodResponse.Message = ex.Message;
+            }
+            return methodResponse;
         }
     }
 }

@@ -11,6 +11,8 @@ namespace newsApi.Services.ImageService
 
         Task<ServiceResponse<string>> DownloadImageToBase64(string url);
 
+        Task<ServiceResponse<bool>> DeleteImage(Guid imageId);
+
         string GetFileExtension(string url);
     }
 }
