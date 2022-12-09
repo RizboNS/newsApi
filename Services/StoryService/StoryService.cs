@@ -285,6 +285,7 @@ namespace newsApi.Services.StoryService
             }
             if (newDoc == null)
             {
+                // TO DO !
                 Console.WriteLine("Delete all images in old doc");
                 return;
             }
