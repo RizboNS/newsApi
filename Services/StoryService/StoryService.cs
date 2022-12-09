@@ -273,7 +273,7 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        private async void CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc, Story story)
+        private async Task CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc, Story story)
         {
             if (oldDoc == null)
             {

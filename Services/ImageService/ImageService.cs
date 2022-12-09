@@ -219,19 +219,11 @@ namespace newsApi.Services.ImageService
                 {
                     foreach (var image in imagesDb)
                     {
-                        var res = deleteFromSystem(image.LocationPath);
-                        if (res.Success)
-                        {
-                            _context.ImageDbs.Remove(image);
-                        }
-                        else
-                        {
-                            methodResponse = res;
-                        }
+                        methodResponse = deleteFromSystem(image.LocationPath);
                     }
                     if (methodResponse.Success)
                     {
-                        // Check why is this throwing Dispose error.
+                        _context.ImageDbs.RemoveRange(imagesDb);
                         await _context.SaveChangesAsync();
                     }
                 }
