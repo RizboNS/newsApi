@@ -13,6 +13,8 @@ namespace newsApi.Services.ImageService
 
         Task<ServiceResponse<bool>> DeleteImage(Guid imageId);
 
+        Task<MethodResponse> DeleteImagesFromStory(Guid storyId);
+
         string GetFileExtension(string url);
     }
 }

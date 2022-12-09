@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ImageMagick;
+using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
@@ -109,7 +110,6 @@ namespace newsApi.Services.ImageService
                     break;
 
                 default:
-                    // Exit
                     break;
             }
             try
@@ -203,6 +203,50 @@ namespace newsApi.Services.ImageService
                 methodResponse.Success = false;
                 methodResponse.Message = ex.Message;
             }
+            return methodResponse;
+        }
+
+        public async Task<MethodResponse> DeleteImagesFromStory(Guid storyId)
+        {
+            var methodResponse = new MethodResponse();
+            var imagesDb = await _context.ImageDbs
+                .Where(i => i.StoryId == storyId)
+                .ToListAsync();
+
+            try
+            {
+                if (imagesDb.Count > 0 || imagesDb != null)
+                {
+                    foreach (var image in imagesDb)
+                    {
+                        var res = deleteFromSystem(image.LocationPath);
+                        if (res.Success)
+                        {
+                            _context.ImageDbs.Remove(image);
+                        }
+                        else
+                        {
+                            methodResponse = res;
+                        }
+                    }
+                    if (methodResponse.Success)
+                    {
+                        // Check why is this throwing Dispose error.
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    methodResponse.Success = false;
+                    methodResponse.Message = "Images not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                methodResponse.Success = false;
+                methodResponse.Message = ex.Message;
+            }
+
             return methodResponse;
         }
     }

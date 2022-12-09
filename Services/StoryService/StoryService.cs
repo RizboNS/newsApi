@@ -275,18 +275,13 @@ namespace newsApi.Services.StoryService
 
         private async void CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc, Story story)
         {
-            foreach (var imageDb in story.ImageDbs)
-            {
-                Console.WriteLine(imageDb.LocationPath);
-            }
             if (oldDoc == null)
             {
                 return;
             }
             if (newDoc == null)
             {
-                // TO DO !
-                Console.WriteLine("Delete all images in old doc");
+                await _imageService.DeleteImagesFromStory(story.Id);
                 return;
             }
 
@@ -304,11 +299,9 @@ namespace newsApi.Services.StoryService
                 }
                 if (!urlFound)
                 {
-                    Console.WriteLine($"Delete: {urlOld}");
                     Uri uri = new Uri(urlOld);
                     var file = Path.GetFileName(uri.LocalPath);
                     var fileId = new Guid(file.Split(".")[0]);
-                    Console.WriteLine($"Delete {fileId} from DB and System");
                     await _imageService.DeleteImage(fileId);
                 }
             }
