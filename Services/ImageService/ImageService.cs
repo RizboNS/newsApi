@@ -22,7 +22,7 @@ namespace newsApi.Services.ImageService
             _context = context;
         }
 
-        public async Task<ServiceResponse<List<ImageDb>>> CreateImages(List<ImageSavedDto> images, Guid storyId)
+        public async Task<ServiceResponse<List<ImageDb>>> CreateImages(List<ImageDto> images, Guid storyId)
         {
             var serviceResponse = new ServiceResponse<List<ImageDb>>();
             var imageDbs = new List<ImageDb>();
@@ -74,10 +74,10 @@ namespace newsApi.Services.ImageService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<ImageSavedDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, Category storyCategory)
+        public async Task<ServiceResponse<ImageDto>> SaveImage(string imageAsBase64, string imageFileType, Guid storyId, Category storyCategory)
         {
-            var serviceResponse = new ServiceResponse<ImageSavedDto>();
-            var imageSaveDto = new ImageSavedDto();
+            var serviceResponse = new ServiceResponse<ImageDto>();
+            var imageSaveDto = new ImageDto();
 
             imageSaveDto.Id = Guid.NewGuid();
 

@@ -32,7 +32,7 @@ namespace newsApi.Services.StoryService
             var serviceResponse = new ServiceResponse<StoryCreatedDto>();
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
-            var savedImages = new List<ImageSavedDto>();
+            var savedImages = new List<ImageDto>();
 
             foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
             {
@@ -52,10 +52,9 @@ namespace newsApi.Services.StoryService
                     var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
                     if (res.Success == true && res.Data != null)
                     {
-                        res.Data.LocationDomain = domainName;
                         savedImages.Add(res.Data);
 
-                        att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                        att.Value = domainName + res.Data.LocationPath;
                     }
                 }
                 else
@@ -173,7 +172,7 @@ namespace newsApi.Services.StoryService
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyUpdateDto.HtmlData);
 
-            var savedImages = new List<ImageSavedDto>();
+            var savedImages = new List<ImageDto>();
 
             var imgNodesOld = htmlDocOld.DocumentNode.SelectNodes("//img[@src]");
             var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
@@ -200,10 +199,9 @@ namespace newsApi.Services.StoryService
                         var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
                         if (res.Success == true && res.Data != null)
                         {
-                            res.Data.LocationDomain = domainName;
                             savedImages.Add(res.Data);
 
-                            att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                            att.Value = domainName + res.Data.LocationPath;
                         }
                     }
                     else
@@ -228,10 +226,8 @@ namespace newsApi.Services.StoryService
                             var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyUpdateDto.Id, storyUpdateDto.Category);
                             if (res.Success == true && res.Data != null)
                             {
-                                res.Data.LocationDomain = domainName;
                                 savedImages.Add(res.Data);
-
-                                att.Value = res.Data.LocationDomain + res.Data.LocationPath;
+                                att.Value = domainName + res.Data.LocationPath;
                             }
                         }
                     }
