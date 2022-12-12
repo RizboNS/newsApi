@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
+using newsApi.Services.AdminService;
 using newsApi.Services.ImageService;
 using newsApi.Services.StoryService;
 
@@ -12,6 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddCors(
     p =>
         p.AddPolicy("corspolicy",

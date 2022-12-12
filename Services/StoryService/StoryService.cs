@@ -160,7 +160,6 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
                 }
-                CheckDomain(domainName, story);
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
             }
             catch (Exception ex)
@@ -314,30 +313,6 @@ namespace newsApi.Services.StoryService
                     var file = Path.GetFileName(uri.LocalPath);
                     var fileId = new Guid(file.Split(".")[0]);
                     await _imageService.DeleteImage(fileId);
-                }
-            }
-        }
-
-        private void CheckDomain(string domain, Story story)
-        {
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(story.HtmlData);
-
-            var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
-
-            if (imgNodes != null)
-            {
-                foreach (HtmlNode link in imgNodes)
-                {
-                    var url = link.Attributes["src"].Value;
-                    var uriFull = new Uri(url);
-                    var urlHost = uriFull.GetLeftPart(UriPartial.Authority);
-                    var urlLocalPath = new Uri(url).LocalPath;
-                    if (urlHost == domain.Substring(0, domain.Length - 1))
-                    {
-                        var updatedUrl = urlHost + urlLocalPath;
-                        // Update URL in HTML and DB
-                    }
                 }
             }
         }
