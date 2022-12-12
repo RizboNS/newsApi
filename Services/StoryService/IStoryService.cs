@@ -9,7 +9,7 @@ namespace newsApi.Services.StoryService
 
         Task<ServiceResponse<List<StoryResponseDto>>> GetStories();
 
-        Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId);
+        Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId, string domainName);
 
         Task<ServiceResponse<List<StoryResponseDto>>> GetStoriesByCategory(Category category);
 
