@@ -38,7 +38,6 @@ namespace newsApi.Controllers
         [HttpGet("{storyId}")]
         public async Task<IActionResult> GetStory(Guid storyId)
         {
-            Console.WriteLine("ran");
             var response = await _storyService.GetStory(storyId);
 
             if (response.Data == null)

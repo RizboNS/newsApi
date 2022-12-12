@@ -26,7 +26,6 @@ namespace newsApi.Services.StoryService
 
         public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
         {
-            // Add option to insert image from a link (similar to the method in update story).
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
             var serviceResponse = new ServiceResponse<StoryCreatedDto>();
@@ -59,9 +58,28 @@ namespace newsApi.Services.StoryService
                 }
                 else
                 {
-                    serviceResponse.Success = false;
-                    serviceResponse.Message = "Invalid image fromat.";
-                    return serviceResponse;
+                    var urlLocalPath = new Uri(url).LocalPath;
+                    var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
+                    if (!File.Exists(serverPath))
+                    {
+                        var resDownload = await _imageService.DownloadImageToBase64(url);
+                        if (resDownload.Data == null)
+                        {
+                            serviceResponse.Success = false;
+                            serviceResponse.Message = resDownload.Message;
+                            return serviceResponse;
+                        }
+
+                        var imageAsBase64 = resDownload.Data;
+                        var imageFileType = _imageService.GetFileExtension(url);
+
+                        var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
+                        if (res.Success == true && res.Data != null)
+                        {
+                            savedImages.Add(res.Data);
+                            att.Value = domainName + res.Data.LocationPath;
+                        }
+                    }
                 }
             }
 
