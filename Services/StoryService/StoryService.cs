@@ -178,7 +178,7 @@ namespace newsApi.Services.StoryService
             var imgNodesOld = htmlDocOld.DocumentNode.SelectNodes("//img[@src]");
             var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
 
-            CompareHtmls(imgNodesOld, imgNodes, story);
+            await CompareHtmls(imgNodesOld, imgNodes, story);
 
             if (imgNodes != null)
             {
@@ -212,7 +212,6 @@ namespace newsApi.Services.StoryService
                         var localHost = new Uri(domainName).Host;
                         var urlLocalPath = new Uri(url).LocalPath;
                         var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
-                        // IF urlHOST AND localHOST are not equals and serverPath exists then change domain in the url and update DB and HTML
                         if (!File.Exists(serverPath))
                         {
                             var resDownload = await _imageService.DownloadImageToBase64(url);
