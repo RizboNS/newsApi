@@ -22,11 +22,11 @@ namespace newsApi.Controllers
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             var serviceResponse = await _storyService.CreateStory(storyCreateDto, domainName);
-            if (!serviceResponse.Success)
+            if (serviceResponse.Data == null)
             {
                 return BadRequest(serviceResponse);
             }
-            return Ok(serviceResponse);
+            return CreatedAtRoute(nameof(GetStory), new { storyId = serviceResponse.Data.Id }, serviceResponse);
         }
 
         [HttpGet]
@@ -52,11 +52,29 @@ namespace newsApi.Controllers
             return Ok(response);
         }
 
+        // Calling route I keep on forgeting :) https://localhost:7400/api/Story/category?category=bastina&page=1
+        [HttpGet("category")]
+        public async Task<IActionResult> GetStoriesByCategory([FromQuery] Category category, [FromQuery] int page)
+        {
+            return Ok(await _storyService.GetStoriesByCategoryPaged(category, page));
+        }
+
         [HttpPut]
         public async Task<IActionResult> UpdateStory(StoryUpdateDto storyUpdateDto)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             return Ok(await _storyService.UpdateStory(storyUpdateDto, domainName));
+        }
+
+        [HttpDelete("{storyId}")]
+        public async Task<IActionResult> DeleteStory(Guid storyId)
+        {
+            var response = await _storyService.DeleteStory(storyId);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }

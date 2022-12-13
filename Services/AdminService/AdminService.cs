@@ -51,13 +51,15 @@ namespace newsApi.Services.AdminService
                     var uriFull = new Uri(url);
                     var urlHost = uriFull.GetLeftPart(UriPartial.Authority);
                     var urlLocalPath = new Uri(url).LocalPath;
-                    domain = domain.Substring(0, domain.Length - 1);
-                    if (urlHost != domain)
+                    var domainTrimmed = domain.Substring(0, domain.Length - 1);
+                    Console.WriteLine("urlHost " + urlHost);
+                    Console.WriteLine("domainTrimmed: " + domainTrimmed);
+                    if (urlHost != domainTrimmed)
                     {
-                        var updatedUrl = domain + urlLocalPath;
+                        var updatedUrl = domainTrimmed + urlLocalPath;
                         attribute.Value = updatedUrl;
                         isEdited = true;
-                        Console.WriteLine("Edited");
+                        Console.WriteLine("edited1");
                     }
                 }
                 if (isEdited)
@@ -69,6 +71,7 @@ namespace newsApi.Services.AdminService
 
                     story.HtmlData = streamReader.ReadToEnd();
                     _context.Stories.Update(story);
+                    Console.WriteLine("edited");
                     await _context.SaveChangesAsync();
                 }
             }

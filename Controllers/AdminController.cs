@@ -15,7 +15,7 @@ namespace newsApi.Controllers
             _adminService = adminService;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> CheckForDomainPathInDb()
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;

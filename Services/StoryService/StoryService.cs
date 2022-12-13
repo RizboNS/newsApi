@@ -119,6 +119,32 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
+        public async Task<MethodResponse> DeleteStory(Guid storyId)
+        {
+            var methodResponse = new MethodResponse();
+            var story = _context.Stories.FirstOrDefault(s => s.Id == storyId);
+            if (story == null)
+            {
+                methodResponse.Success = false;
+                methodResponse.Message = "Story not found";
+            }
+            else
+            {
+                try
+                {
+                    await _imageService.DeleteImagesFromStory(storyId);
+                    _context.Remove(story);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    methodResponse.Success = false;
+                    methodResponse.Message = ex.Message;
+                }
+            }
+            return methodResponse;
+        }
+
         public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories()
         {
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
@@ -139,9 +165,35 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public Task<ServiceResponse<List<StoryResponseDto>>> GetStoriesByCategory(Category category)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page)
         {
-            throw new NotImplementedException();
+            var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
+            var pageResult = 4f; // Change to 10 for production
+            var pageCount = Math.Ceiling(_context.Stories.Where(s => s.Category == category).Count() / pageResult);
+            try
+            {
+                var stories = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .Where(s => s.Category == category)
+                    .OrderByDescending(s => s.CreatedTime) // Change to Publish time when set.
+                    .Skip((page - 1) * (int)pageResult)
+                    .Take((int)pageResult)
+                    .ToListAsync();
+
+                serviceResponse.Data = new StoryResponsePagedDto
+                {
+                    Stories = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories),
+                    PageCount = (int)pageCount,
+                    PageSize = (int)pageResult,
+                    Page = page
+                };
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
         }
 
         public async Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId, string domainName)
