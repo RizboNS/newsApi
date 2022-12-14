@@ -32,10 +32,11 @@ namespace newsApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStories()
         {
-            return Ok(await _storyService.GetStories());
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            return Ok(await _storyService.GetStories(domainName));
         }
 
-        [HttpGet("{storyId}")]
+        [HttpGet("{storyId}", Name = "GetStory")]
         public async Task<IActionResult> GetStory(Guid storyId)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;

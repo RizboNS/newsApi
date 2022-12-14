@@ -5,6 +5,7 @@ using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
 using newsApi.Services.ImageService;
+using System.Reflection.Metadata;
 
 namespace newsApi.Services.StoryService
 {
@@ -32,52 +33,77 @@ namespace newsApi.Services.StoryService
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
             var savedImages = new List<ImageDto>();
+            var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
 
-            foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
+            var iconExtension = GetFileExtension(storyCreateDto.Icon);
+
+            if (iconExtension == string.Empty)
             {
-                HtmlAttribute att = link.Attributes["src"];
-                var url = att.Value;
-                string[] split01 = url.Split(",");
-                if (split01.Length > 1)
-                {
-                    var imageAsBase64 = split01[1];
-                    var imageFileType = string.Empty;
-                    if (split01[0].Contains("image"))
-                    {
-                        string[] split02 = split01[0].Split("/");
-                        string[] split03 = split02[1].Split(";");
-                        imageFileType = split03[0];
-                    }
-                    var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
-                    if (res.Success == true && res.Data != null)
-                    {
-                        savedImages.Add(res.Data);
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Icon extension is not valid";
+                return serviceResponse;
+            }
+            var response = await _imageService.SaveImage(storyCreateDto.Icon.Split(",")[1], iconExtension, storyCreatedDto.Id, storyCreateDto.Category);
+            if (response.Success && response.Data != null)
+            {
+                storyCreatedDto.IconPath = response.Data.LocationPath;
+                savedImages.Add(response.Data);
+            }
+            else
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Icon could not be saved";
+                return serviceResponse;
+            }
 
-                        att.Value = domainName + res.Data.LocationPath;
-                    }
-                }
-                else
+            if (imgNodes != null)
+            {
+                foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
                 {
-                    var urlLocalPath = new Uri(url).LocalPath;
-                    var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
-                    if (!File.Exists(serverPath))
+                    HtmlAttribute att = link.Attributes["src"];
+                    var url = att.Value;
+                    string[] split01 = url.Split(",");
+                    if (split01.Length > 1)
                     {
-                        var resDownload = await _imageService.DownloadImageToBase64(url);
-                        if (resDownload.Data == null)
+                        var imageAsBase64 = split01[1];
+                        var imageFileType = string.Empty;
+                        if (split01[0].Contains("image"))
                         {
-                            serviceResponse.Success = false;
-                            serviceResponse.Message = resDownload.Message;
-                            return serviceResponse;
+                            string[] split02 = split01[0].Split("/");
+                            string[] split03 = split02[1].Split(";");
+                            imageFileType = split03[0];
                         }
-
-                        var imageAsBase64 = resDownload.Data;
-                        var imageFileType = _imageService.GetFileExtension(url);
-
                         var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
-                        if (res.Success == true && res.Data != null)
+                        if (res.Success && res.Data != null)
                         {
                             savedImages.Add(res.Data);
+
                             att.Value = domainName + res.Data.LocationPath;
+                        }
+                    }
+                    else
+                    {
+                        var urlLocalPath = new Uri(url).LocalPath;
+                        var serverPath = _environment.WebRootPath + "/" + urlLocalPath;
+                        if (!File.Exists(serverPath))
+                        {
+                            var resDownload = await _imageService.DownloadImageToBase64(url);
+                            if (resDownload.Data == null)
+                            {
+                                serviceResponse.Success = false;
+                                serviceResponse.Message = resDownload.Message;
+                                return serviceResponse;
+                            }
+
+                            var imageAsBase64 = resDownload.Data;
+                            var imageFileType = _imageService.GetFileExtension(url);
+
+                            var res = await _imageService.SaveImage(imageAsBase64, imageFileType, storyCreatedDto.Id, storyCreateDto.Category);
+                            if (res.Success == true && res.Data != null)
+                            {
+                                savedImages.Add(res.Data);
+                                att.Value = domainName + res.Data.LocationPath;
+                            }
                         }
                     }
                 }
@@ -107,11 +133,11 @@ namespace newsApi.Services.StoryService
                 serviceResponse.Message = ex.Message;
             }
 
-            var response = await _imageService.CreateImages(savedImages, storyCreatedDto.Id);
-            if (!response.Success)
+            var response1 = await _imageService.CreateImages(savedImages, storyCreatedDto.Id);
+            if (!response1.Success)
             {
-                serviceResponse.Success = response.Success;
-                serviceResponse.Message = response.Message;
+                serviceResponse.Success = response1.Success;
+                serviceResponse.Message = response1.Message;
                 return serviceResponse;
             }
 
@@ -145,7 +171,7 @@ namespace newsApi.Services.StoryService
             return methodResponse;
         }
 
-        public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories()
+        public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories(string domainName)
         {
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
             try
@@ -155,6 +181,10 @@ namespace newsApi.Services.StoryService
                     .ToListAsync();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
+                foreach (var story in serviceResponse.Data)
+                {
+                    story.IconPath = domainName + story.IconPath;
+                }
             }
             catch (Exception ex)
             {
@@ -212,6 +242,7 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
                 }
+                story.IconPath = domainName + story.IconPath;
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
             }
             catch (Exception ex)
@@ -324,11 +355,11 @@ namespace newsApi.Services.StoryService
                 serviceResponse.Message = ex.Message;
             }
 
-            var response = await _imageService.CreateImages(savedImages, story.Id);
-            if (!response.Success)
+            var response1 = await _imageService.CreateImages(savedImages, story.Id);
+            if (!response1.Success)
             {
-                serviceResponse.Success = response.Success;
-                serviceResponse.Message = response.Message;
+                serviceResponse.Success = response1.Success;
+                serviceResponse.Message = response1.Message;
                 return serviceResponse;
             }
 
@@ -367,6 +398,18 @@ namespace newsApi.Services.StoryService
                     await _imageService.DeleteImage(fileId);
                 }
             }
+        }
+
+        private string GetFileExtension(string base64Image)
+        {
+            string[] split01 = base64Image.Split(",");
+            if (split01.Length > 1)
+            {
+                string[] split02 = split01[0].Split("/");
+                string[] split03 = split02[1].Split(";");
+                return split03[0];
+            }
+            return string.Empty;
         }
     }
 }
