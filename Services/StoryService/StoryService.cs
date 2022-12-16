@@ -119,6 +119,7 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.Category = storyCreateDto.Category;
             storyCreatedDto.Title = storyCreateDto.Title;
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
+            storyCreatedDto.Publish = storyCreateDto.Publish;
 
             Story story = _mapper.Map<Story>(storyCreatedDto);
 

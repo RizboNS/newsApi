@@ -10,5 +10,6 @@ namespace newsApi.Dtos
         public Category Category { get; set; }
         public string HtmlData { get; set; } = string.Empty;
         public DateTime PublishTime { get; set; }
+        public bool Publish { get; set; }
     }
 }
