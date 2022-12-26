@@ -15,6 +15,8 @@ namespace newsApi.Services.ImageService
 
         Task<MethodResponse> DeleteImagesFromStory(Guid storyId);
 
+        Task<ServiceResponse<ImageDto>> MoveImageToNewCategory(string path, Category newCategory);
+
         string GetFileExtension(string url);
     }
 }

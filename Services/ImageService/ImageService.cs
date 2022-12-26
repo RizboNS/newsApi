@@ -215,8 +215,11 @@ namespace newsApi.Services.ImageService
 
             try
             {
+                var folder = string.Empty;
                 if (imagesDb.Count > 0 || imagesDb != null)
                 {
+                    folder = _environment.WebRootPath + "/" + imagesDb[0].LocationPath.Substring(0, imagesDb[0].LocationPath.LastIndexOf('/'));
+                    Console.WriteLine(folder);
                     foreach (var image in imagesDb)
                     {
                         methodResponse = deleteFromSystem(image.LocationPath);
@@ -232,6 +235,11 @@ namespace newsApi.Services.ImageService
                     methodResponse.Success = false;
                     methodResponse.Message = "Images not found.";
                 }
+
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
             }
             catch (Exception ex)
             {
@@ -240,6 +248,54 @@ namespace newsApi.Services.ImageService
             }
 
             return methodResponse;
+        }
+
+        public async Task<ServiceResponse<ImageDto>> MoveImageToNewCategory(string path, Category newCategory)
+        {
+            var serviceResponse = new ServiceResponse<ImageDto>();
+            var imageDto = new ImageDto();
+            var imageDb = await _context.ImageDbs
+                .Where(i => i.LocationPath == path)
+                .FirstOrDefaultAsync();
+            if (imageDb == null)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Image not found at the Database.";
+                return serviceResponse;
+            }
+
+            var oldPath = _environment.WebRootPath + "/" + path;
+            var fileName = Path.GetFileName(oldPath);
+
+            var partialPath = GetPartialPath(imageDb.StoryId, newCategory.ToString());
+            var newPath = _environment.WebRootPath + "/" + partialPath;
+            try
+            {
+                if (File.Exists(oldPath))
+                {
+                    if (!Directory.Exists(newPath))
+                    {
+                        Directory.CreateDirectory(newPath);
+                    }
+                    File.Move(oldPath, newPath + "/" + path.Split('/').Last());
+                    imageDto.LocationPath = partialPath + "/" + fileName;
+                    imageDb.LocationPath = partialPath + "/" + fileName;
+                    serviceResponse.Data = imageDto;
+                    // TO DO IF old folder is empty delete it
+                }
+                else
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "File does not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
         }
     }
 }

@@ -266,6 +266,23 @@ namespace newsApi.Services.StoryService
                 serviceResponse.Message = "Story not found.";
                 return serviceResponse;
             }
+
+            // Check if story category is changed and move icon image to new folder
+            if (story.Category != storyUpdateDto.Category)
+            {
+                var res = await _imageService.MoveImageToNewCategory(story.IconPath, storyUpdateDto.Category);
+                if (!res.Success)
+                {
+                    serviceResponse.Success = res.Success;
+                    serviceResponse.Message = res.Message;
+                    return serviceResponse;
+                }
+                if (res.Data != null)
+                {
+                    story.IconPath = res.Data.LocationPath;
+                }
+            }
+
             var htmlDocOld = new HtmlDocument();
             htmlDocOld.LoadHtml(story.HtmlData);
 
