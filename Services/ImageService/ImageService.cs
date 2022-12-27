@@ -158,6 +158,15 @@ namespace newsApi.Services.ImageService
                     {
                         _context.ImageDbs.Remove(imageToDelete);
                         await _context.SaveChangesAsync();
+                        var dir = _environment.WebRootPath + "/" + imageToDelete.LocationPath;
+                        if (Directory.Exists(dir))
+                        {
+                            bool isDirPathEmpty = !Directory.EnumerateFileSystemEntries(dir).Any();
+                            if (isDirPathEmpty)
+                            {
+                                Directory.Delete(dir, true);
+                            }
+                        }
                     }
                     else
                     {
@@ -219,7 +228,6 @@ namespace newsApi.Services.ImageService
                 if (imagesDb.Count > 0 || imagesDb != null)
                 {
                     folder = _environment.WebRootPath + "/" + imagesDb[0].LocationPath.Substring(0, imagesDb[0].LocationPath.LastIndexOf('/'));
-                    Console.WriteLine(folder);
                     foreach (var image in imagesDb)
                     {
                         methodResponse = deleteFromSystem(image.LocationPath);
@@ -266,7 +274,7 @@ namespace newsApi.Services.ImageService
 
             var oldPath = _environment.WebRootPath + "/" + path;
             var fileName = Path.GetFileName(oldPath);
-
+            var dirPath = Path.GetDirectoryName(oldPath);
             var partialPath = GetPartialPath(imageDb.StoryId, newCategory.ToString());
             var newPath = _environment.WebRootPath + "/" + partialPath;
             try
@@ -281,7 +289,15 @@ namespace newsApi.Services.ImageService
                     imageDto.LocationPath = partialPath + "/" + fileName;
                     imageDb.LocationPath = partialPath + "/" + fileName;
                     serviceResponse.Data = imageDto;
-                    // TO DO IF old folder is empty delete it
+
+                    if (Directory.Exists(dirPath))
+                    {
+                        bool isDirPathEmpty = !Directory.EnumerateFileSystemEntries(dirPath).Any();
+                        if (isDirPathEmpty)
+                        {
+                            Directory.Delete(dirPath, true);
+                        }
+                    }
                 }
                 else
                 {
@@ -296,6 +312,30 @@ namespace newsApi.Services.ImageService
             }
 
             return serviceResponse;
+        }
+
+        public async Task<MethodResponse> ImageExists(string path)
+        {
+            var response = new MethodResponse();
+
+            try
+            {
+                var image = await _context.ImageDbs.FirstOrDefaultAsync(i => i.LocationPath == path);
+                if (image == null)
+                {
+                    response.Success = false;
+                    response.Message = "Image does not exist.";
+                    return response;
+                }
+            }
+            catch (Exception error)
+            {
+                response.Success = false;
+                response.Message = error.Message;
+                return response;
+            }
+
+            return response;
         }
     }
 }

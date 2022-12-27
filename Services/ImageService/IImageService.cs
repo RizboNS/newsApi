@@ -17,6 +17,8 @@ namespace newsApi.Services.ImageService
 
         Task<ServiceResponse<ImageDto>> MoveImageToNewCategory(string path, Category newCategory);
 
+        Task<MethodResponse> ImageExists(string path);
+
         string GetFileExtension(string url);
     }
 }

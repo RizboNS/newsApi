@@ -268,7 +268,8 @@ namespace newsApi.Services.StoryService
             }
 
             // Check if story category is changed and move icon image to new folder
-            if (story.Category != storyUpdateDto.Category)
+            bool categoryChanged = story.Category != storyUpdateDto.Category;
+            if (categoryChanged)
             {
                 var res = await _imageService.MoveImageToNewCategory(story.IconPath, storyUpdateDto.Category);
                 if (!res.Success)
@@ -343,6 +344,34 @@ namespace newsApi.Services.StoryService
                             {
                                 savedImages.Add(res.Data);
                                 att.Value = domainName + res.Data.LocationPath;
+                            }
+                        }
+                        else
+                        {
+                            if (categoryChanged)
+                            {
+                                // Check if image is in database
+                                var urlLocalPathWithoutFirstSlash = urlLocalPath.Substring(1);
+                                var res = await _imageService.ImageExists(urlLocalPathWithoutFirstSlash);
+                                if (res.Success)
+                                {
+                                    // Check if image is on the server. If yes move it to the new category dir.
+                                    if (File.Exists(serverPath))
+                                    {
+                                        var response = await _imageService.MoveImageToNewCategory(urlLocalPathWithoutFirstSlash, storyUpdateDto.Category);
+                                        if (!response.Success)
+                                        {
+                                            serviceResponse.Success = response.Success;
+                                            serviceResponse.Message = response.Message;
+                                            return serviceResponse;
+                                        }
+                                        if (response.Data != null)
+                                        {
+                                            savedImages.Add(response.Data);
+                                            att.Value = domainName + response.Data.LocationPath;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
