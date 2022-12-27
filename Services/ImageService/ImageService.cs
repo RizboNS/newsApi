@@ -338,5 +338,19 @@ namespace newsApi.Services.ImageService
 
             return response;
         }
+
+        public async Task<ServiceResponse<Guid>> GetIconId(string path)
+        {
+            var res = new ServiceResponse<Guid>();
+            var imageDb = await _context.ImageDbs.FirstOrDefaultAsync(i => i.LocationPath == path);
+            if (imageDb == null)
+            {
+                res.Success = false;
+                res.Message = "Image not found.";
+                return res;
+            }
+            res.Data = imageDb.Id;
+            return res;
+        }
     }
 }

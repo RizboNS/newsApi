@@ -19,6 +19,8 @@ namespace newsApi.Services.ImageService
 
         Task<MethodResponse> ImageExists(string path);
 
+        Task<ServiceResponse<Guid>> GetIconId(string path);
+
         string GetFileExtension(string url);
     }
 }

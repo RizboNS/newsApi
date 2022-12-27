@@ -257,6 +257,7 @@ namespace newsApi.Services.StoryService
         public async Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponseDto>();
+            var savedImages = new List<ImageDto>();
             var story = await _context.Stories
                 .Include(s => s.ImageDbs)
                 .FirstOrDefaultAsync(s => s.Id == storyUpdateDto.Id);
@@ -269,7 +270,7 @@ namespace newsApi.Services.StoryService
 
             // Check if story category is changed and move icon image to new folder
             bool categoryChanged = story.Category != storyUpdateDto.Category;
-            if (categoryChanged)
+            if (categoryChanged && story.IconPath == storyUpdateDto.Icon)
             {
                 var res = await _imageService.MoveImageToNewCategory(story.IconPath, storyUpdateDto.Category);
                 if (!res.Success)
@@ -283,6 +284,42 @@ namespace newsApi.Services.StoryService
                     story.IconPath = res.Data.LocationPath;
                 }
             }
+            else if (domainName + story.IconPath != storyUpdateDto.Icon)
+            {
+                var iconExtension = GetFileExtension(storyUpdateDto.Icon);
+
+                if (iconExtension == string.Empty)
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Icon extension is not valid";
+                    return serviceResponse;
+                }
+                var response = await _imageService.SaveImage(storyUpdateDto.Icon.Split(",")[1], iconExtension, storyUpdateDto.Id, storyUpdateDto.Category);
+                if (response.Success && response.Data != null)
+                {
+                    var res = await _imageService.GetIconId(story.IconPath);
+                    if (res.Success)
+                    {
+                        var iconId = res.Data;
+                        var delRes = await _imageService.DeleteImage(iconId);
+                        if (!delRes.Success)
+                        {
+                            serviceResponse.Success = false;
+                            serviceResponse.Message = $"Deleting image {iconId} failed.";
+                            return serviceResponse;
+                        }
+                    }
+
+                    storyUpdateDto.Icon = response.Data.LocationPath;
+                    savedImages.Add(response.Data);
+                }
+                else
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = "Icon could not be saved";
+                    return serviceResponse;
+                }
+            }
 
             var htmlDocOld = new HtmlDocument();
             htmlDocOld.LoadHtml(story.HtmlData);
@@ -290,12 +327,10 @@ namespace newsApi.Services.StoryService
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyUpdateDto.HtmlData);
 
-            var savedImages = new List<ImageDto>();
-
             var imgNodesOld = htmlDocOld.DocumentNode.SelectNodes("//img[@src]");
             var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
 
-            await CompareHtmls(imgNodesOld, imgNodes, story);
+            await CompareHtmls(imgNodesOld, imgNodes);
 
             if (imgNodes != null)
             {
@@ -388,6 +423,7 @@ namespace newsApi.Services.StoryService
             story.Category = storyUpdateDto.Category;
             story.Title = storyUpdateDto.Title;
             story.PublishTime = storyUpdateDto.PublishTime;
+            story.IconPath = storyUpdateDto.Icon;
 
             try
             {
@@ -412,7 +448,7 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        private async Task CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc, Story story)
+        private async Task CompareHtmls(HtmlNodeCollection oldDoc, HtmlNodeCollection newDoc)
         {
             if (oldDoc == null)
             {
