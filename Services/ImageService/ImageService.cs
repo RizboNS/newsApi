@@ -159,6 +159,7 @@ namespace newsApi.Services.ImageService
                         _context.ImageDbs.Remove(imageToDelete);
                         await _context.SaveChangesAsync();
                         var dir = _environment.WebRootPath + "/" + imageToDelete.LocationPath;
+                        dir = Path.GetDirectoryName(dir);
                         if (Directory.Exists(dir))
                         {
                             bool isDirPathEmpty = !Directory.EnumerateFileSystemEntries(dir).Any();

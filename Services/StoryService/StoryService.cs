@@ -420,7 +420,15 @@ namespace newsApi.Services.StoryService
             }
             if (newDoc == null)
             {
-                await _imageService.DeleteImagesFromStory(story.Id);
+                // loop oldDoc and delete images...
+                foreach (var linkOld in oldDoc)
+                {
+                    var urlOld = linkOld.Attributes["src"].Value;
+                    Uri uri = new Uri(urlOld);
+                    var file = Path.GetFileName(uri.LocalPath);
+                    var fileId = new Guid(file.Split(".")[0]);
+                    await _imageService.DeleteImage(fileId);
+                }
                 return;
             }
 
