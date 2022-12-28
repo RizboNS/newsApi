@@ -64,7 +64,16 @@ namespace newsApi.Controllers
         public async Task<IActionResult> UpdateStory(StoryUpdateDto storyUpdateDto)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
-            return Ok(await _storyService.UpdateStory(storyUpdateDto, domainName));
+            var serviceResponse = await _storyService.UpdateStory(storyUpdateDto, domainName);
+            if (serviceResponse.Data == null)
+            {
+                return BadRequest(serviceResponse);
+            }
+            if (!serviceResponse.Success)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
 
         [HttpDelete("{storyId}")]

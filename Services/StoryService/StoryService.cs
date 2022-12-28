@@ -504,11 +504,15 @@ namespace newsApi.Services.StoryService
 
         private string GetPathWithoutDomain(string path)
         {
-            path = new Uri(path).LocalPath;
-            while (path.StartsWith("/"))
+            if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
             {
-                path = path.Substring(1);
-            }
+                path = new Uri(path).LocalPath;
+                while (path.StartsWith("/"))
+                {
+                    path = path.Substring(1);
+                }
+            } 
+
             return path;
         }
     }

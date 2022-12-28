@@ -148,6 +148,7 @@ namespace newsApi.Services.ImageService
         public async Task<ServiceResponse<bool>> DeleteImage(Guid imageId)
         {
             var serviceResponse = new ServiceResponse<bool>();
+            serviceResponse.Data = true;
             var imageToDelete = await _context.ImageDbs.FindAsync(imageId);
             try
             {
