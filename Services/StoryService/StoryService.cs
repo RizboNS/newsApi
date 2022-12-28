@@ -402,7 +402,7 @@ namespace newsApi.Services.StoryService
                                         }
                                         if (response.Data != null)
                                         {
-                                            savedImages.Add(response.Data);
+                                            //savedImages.Add(response.Data); This is probably causing duplicates in db.
                                             att.Value = domainName + response.Data.LocationPath;
                                         }
                                     }
