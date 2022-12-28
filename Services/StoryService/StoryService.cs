@@ -423,7 +423,7 @@ namespace newsApi.Services.StoryService
             story.Category = storyUpdateDto.Category;
             story.Title = storyUpdateDto.Title;
             story.PublishTime = storyUpdateDto.PublishTime;
-            story.IconPath = storyUpdateDto.Icon;
+            story.IconPath = GetPathWithoutDomain(storyUpdateDto.Icon);
 
             try
             {
@@ -501,12 +501,15 @@ namespace newsApi.Services.StoryService
             }
             return string.Empty;
         }
+
+        private string GetPathWithoutDomain(string path)
+        {
+            path = new Uri(path).LocalPath;
+            while (path.StartsWith("/"))
+            {
+                path = path.Substring(1);
+            }
+            return path;
+        }
     }
 }
-
-//UPDATE
-
-//URL Could be outside of server - Download and Save - OK
-//URL Could be from server (already exist) -Do nothing
-//URL Could be from server but with old domain ( already exists ) -Update domain to current one
-//URL Could be Encoded already (new image) -Save - OK
