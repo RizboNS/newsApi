@@ -270,7 +270,7 @@ namespace newsApi.Services.StoryService
 
             // Check if story category is changed and move icon image to new folder
             bool categoryChanged = story.Category != storyUpdateDto.Category;
-            if (categoryChanged && story.IconPath == storyUpdateDto.Icon)
+            if (categoryChanged && story.IconPath == GetPathWithoutDomain(storyUpdateDto.Icon))
             {
                 var res = await _imageService.MoveImageToNewCategory(story.IconPath, storyUpdateDto.Category);
                 if (!res.Success)
@@ -281,7 +281,7 @@ namespace newsApi.Services.StoryService
                 }
                 if (res.Data != null)
                 {
-                    story.IconPath = res.Data.LocationPath;
+                    storyUpdateDto.Icon = res.Data.LocationPath;
                 }
             }
             else if (domainName + story.IconPath != storyUpdateDto.Icon)
@@ -511,7 +511,7 @@ namespace newsApi.Services.StoryService
                 {
                     path = path.Substring(1);
                 }
-            } 
+            }
 
             return path;
         }
