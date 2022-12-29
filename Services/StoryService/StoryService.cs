@@ -424,6 +424,8 @@ namespace newsApi.Services.StoryService
             story.Title = storyUpdateDto.Title;
             story.PublishTime = storyUpdateDto.PublishTime;
             story.IconPath = GetPathWithoutDomain(storyUpdateDto.Icon);
+            story.Publish = storyUpdateDto.Publish;
+            story.UpdateTime = DateTime.Now;
 
             try
             {
