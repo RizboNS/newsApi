@@ -60,6 +60,12 @@ namespace newsApi.Controllers
             return Ok(await _storyService.GetStoriesByCategoryPaged(category, page));
         }
 
+        [HttpGet("page")]
+        public async Task<IActionResult> GetStoriesPaged([FromQuery] int page)
+        {
+            return Ok(await _storyService.GetStoriesPaged(page));
+        }
+
         [HttpPut]
         public async Task<IActionResult> UpdateStory(StoryUpdateDto storyUpdateDto)
         {

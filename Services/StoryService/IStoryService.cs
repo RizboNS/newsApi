@@ -13,6 +13,8 @@ namespace newsApi.Services.StoryService
 
         Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page);
 
+        Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(int page);
+
         Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName);
 
         Task<MethodResponse> DeleteStory(Guid storyId);

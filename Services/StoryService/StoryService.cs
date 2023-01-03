@@ -195,6 +195,36 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(int page)
+        {
+            var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
+            var pageResult = 4f; // Change to 10 for production
+            var pageCount = Math.Ceiling(_context.Stories.Count() / pageResult);
+            try
+            {
+                var stories = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .OrderByDescending(s => s.PublishTime)
+                    .Skip((page - 1) * (int)pageResult)
+                    .Take((int)pageResult)
+                    .ToListAsync();
+
+                serviceResponse.Data = new StoryResponsePagedDto
+                {
+                    Stories = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories),
+                    PageCount = (int)pageCount,
+                    PageSize = (int)pageResult,
+                    Page = page
+                };
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
         public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
@@ -205,7 +235,7 @@ namespace newsApi.Services.StoryService
                 var stories = await _context.Stories
                     .Include(s => s.ImageDbs)
                     .Where(s => s.Category == category)
-                    .OrderByDescending(s => s.CreatedTime) // Change to Publish time when set.
+                    .OrderByDescending(s => s.PublishTime)
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
                     .ToListAsync();
