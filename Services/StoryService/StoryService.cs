@@ -191,6 +191,16 @@ namespace newsApi.Services.StoryService
                     PageSize = (int)pageResult,
                     Page = page
                 };
+                foreach (var story in serviceResponse.Data.Stories)
+                {
+                    if (story.ImageDbs != null)
+                    {
+                        foreach (var image in story.ImageDbs)
+                        {
+                            image.LocationPath = domainName + image.LocationPath;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -222,6 +232,16 @@ namespace newsApi.Services.StoryService
                     PageSize = (int)pageResult,
                     Page = page
                 };
+                foreach (var story in serviceResponse.Data.Stories)
+                {
+                    if (story.ImageDbs != null)
+                    {
+                        foreach (var image in story.ImageDbs)
+                        {
+                            image.LocationPath = domainName + image.LocationPath;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
