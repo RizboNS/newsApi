@@ -34,27 +34,6 @@ namespace newsApi.Services.StoryService
             var savedImages = new List<ImageDto>();
             var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
 
-            var iconExtension = GetFileExtension(storyCreateDto.Icon);
-
-            if (iconExtension == string.Empty)
-            {
-                serviceResponse.Success = false;
-                serviceResponse.Message = "Icon extension is not valid";
-                return serviceResponse;
-            }
-            var response = await _imageService.SaveImage(storyCreateDto.Icon.Split(",")[1], iconExtension, storyCreatedDto.Id, storyCreateDto.Category);
-            if (response.Success && response.Data != null)
-            {
-                storyCreatedDto.IconPath = response.Data.LocationPath;
-                savedImages.Add(response.Data);
-            }
-            else
-            {
-                serviceResponse.Success = false;
-                serviceResponse.Message = "Icon could not be saved";
-                return serviceResponse;
-            }
-
             if (imgNodes != null)
             {
                 foreach (HtmlNode link in htmlDoc.DocumentNode.SelectNodes("//img[@src]"))
@@ -181,10 +160,6 @@ namespace newsApi.Services.StoryService
                     .ToListAsync();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
-                foreach (var story in serviceResponse.Data)
-                {
-                    story.IconPath = domainName + story.IconPath;
-                }
             }
             catch (Exception ex)
             {
@@ -195,10 +170,10 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(int page)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(int page, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
-            var pageResult = 4f; // Change to 10 for production
+            var pageResult = 10f;
             var pageCount = Math.Ceiling(_context.Stories.Count() / pageResult);
             try
             {
@@ -225,10 +200,10 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
-            var pageResult = 4f; // Change to 10 for production
+            var pageResult = 10f;
             var pageCount = Math.Ceiling(_context.Stories.Where(s => s.Category == category).Count() / pageResult);
             try
             {
@@ -272,7 +247,6 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
                 }
-                story.IconPath = domainName + story.IconPath;
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
             }
             catch (Exception ex)
@@ -298,58 +272,7 @@ namespace newsApi.Services.StoryService
                 return serviceResponse;
             }
 
-            // Check if story category is changed and move icon image to new folder
             bool categoryChanged = story.Category != storyUpdateDto.Category;
-            if (categoryChanged && story.IconPath == GetPathWithoutDomain(storyUpdateDto.Icon))
-            {
-                var res = await _imageService.MoveImageToNewCategory(story.IconPath, storyUpdateDto.Category);
-                if (!res.Success)
-                {
-                    serviceResponse.Success = res.Success;
-                    serviceResponse.Message = res.Message;
-                    return serviceResponse;
-                }
-                if (res.Data != null)
-                {
-                    storyUpdateDto.Icon = res.Data.LocationPath;
-                }
-            }
-            else if (domainName + story.IconPath != storyUpdateDto.Icon)
-            {
-                var iconExtension = GetFileExtension(storyUpdateDto.Icon);
-
-                if (iconExtension == string.Empty)
-                {
-                    serviceResponse.Success = false;
-                    serviceResponse.Message = "Icon extension is not valid";
-                    return serviceResponse;
-                }
-                var response = await _imageService.SaveImage(storyUpdateDto.Icon.Split(",")[1], iconExtension, storyUpdateDto.Id, storyUpdateDto.Category);
-                if (response.Success && response.Data != null)
-                {
-                    var res = await _imageService.GetIconId(story.IconPath);
-                    if (res.Success)
-                    {
-                        var iconId = res.Data;
-                        var delRes = await _imageService.DeleteImage(iconId);
-                        if (!delRes.Success)
-                        {
-                            serviceResponse.Success = false;
-                            serviceResponse.Message = $"Deleting image {iconId} failed.";
-                            return serviceResponse;
-                        }
-                    }
-
-                    storyUpdateDto.Icon = response.Data.LocationPath;
-                    savedImages.Add(response.Data);
-                }
-                else
-                {
-                    serviceResponse.Success = false;
-                    serviceResponse.Message = "Icon could not be saved";
-                    return serviceResponse;
-                }
-            }
 
             var htmlDocOld = new HtmlDocument();
             htmlDocOld.LoadHtml(story.HtmlData);
@@ -452,7 +375,6 @@ namespace newsApi.Services.StoryService
             story.Category = storyUpdateDto.Category;
             story.Title = storyUpdateDto.Title;
             story.PublishTime = storyUpdateDto.PublishTime;
-            story.IconPath = GetPathWithoutDomain(storyUpdateDto.Icon);
             story.Publish = storyUpdateDto.Publish;
             story.UpdateTime = DateTime.Now;
 

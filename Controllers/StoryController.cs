@@ -57,13 +57,15 @@ namespace newsApi.Controllers
         [HttpGet("category")]
         public async Task<IActionResult> GetStoriesByCategory([FromQuery] Category category, [FromQuery] int page)
         {
-            return Ok(await _storyService.GetStoriesByCategoryPaged(category, page));
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            return Ok(await _storyService.GetStoriesByCategoryPaged(category, page, domainName));
         }
 
         [HttpGet("page")]
         public async Task<IActionResult> GetStoriesPaged([FromQuery] int page)
         {
-            return Ok(await _storyService.GetStoriesPaged(page));
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            return Ok(await _storyService.GetStoriesPaged(page, domainName));
         }
 
         [HttpPut]

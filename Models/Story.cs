@@ -7,8 +7,6 @@
         public Category Category { get; set; }
         public string Description { get; set; } = string.Empty;
         public string HtmlData { get; set; } = string.Empty;
-
-        public string IconPath { get; set; } = string.Empty;
         public DateTime PublishTime { get; set; }
         public bool Publish { get; set; }
         public DateTime CreatedTime { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time"));
