@@ -8,7 +8,6 @@ namespace newsApi.Dtos
         public string Title { get; set; } = string.Empty;
         public Category Category { get; set; }
         public bool Publish { get; set; }
-        public string Description { get; set; } = string.Empty;
         public string HtmlData { get; set; } = string.Empty;
         public List<ImageDb>? ImageDbs { get; set; }
         public DateTime PublishTime { get; set; }

@@ -93,7 +93,6 @@ namespace newsApi.Services.StoryService
             StreamReader streamReader = new StreamReader(memoryStream);
 
             storyCreatedDto.HtmlData = streamReader.ReadToEnd();
-            storyCreatedDto.Description = storyCreateDto.Description;
             storyCreatedDto.Category = storyCreateDto.Category;
             storyCreatedDto.Title = storyCreateDto.Title;
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
@@ -391,7 +390,6 @@ namespace newsApi.Services.StoryService
             StreamReader streamReader = new StreamReader(memoryStream);
 
             story.HtmlData = streamReader.ReadToEnd();
-            story.Description = storyUpdateDto.Description;
             story.Category = storyUpdateDto.Category;
             story.Title = storyUpdateDto.Title;
             story.PublishTime = storyUpdateDto.PublishTime;
