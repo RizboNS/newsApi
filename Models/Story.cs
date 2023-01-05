@@ -4,6 +4,7 @@
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
         public Category Category { get; set; }
         public string HtmlData { get; set; } = string.Empty;
         public DateTime PublishTime { get; set; }

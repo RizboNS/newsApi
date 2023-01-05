@@ -53,12 +53,13 @@ namespace newsApi.Controllers
             return Ok(response);
         }
 
-        // Calling route I keep on forgeting :) https://localhost:7400/api/Story/category?category=bastina&page=1
-        [HttpGet("category")]
-        public async Task<IActionResult> GetStoriesByCategory([FromQuery] Category category, [FromQuery] int page)
+        // Calling route I keep on forgeting :) https://localhost:7400/api/Story/filter?type=nesto&category=bastina&page=1
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetStoriesByCategory([FromQuery] string type, [FromQuery] Category category, [FromQuery] int page)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
-            return Ok(await _storyService.GetStoriesByCategoryPaged(category, page, domainName));
+
+            return Ok(await _storyService.GetStoriesByCategoryPaged(type, category, page, domainName));
         }
 
         [HttpGet("page")]

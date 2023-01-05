@@ -95,6 +95,7 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.HtmlData = streamReader.ReadToEnd();
             storyCreatedDto.Category = storyCreateDto.Category;
             storyCreatedDto.Title = storyCreateDto.Title;
+            storyCreatedDto.Type = storyCreateDto.Type;
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
             storyCreatedDto.Publish = storyCreateDto.Publish;
 
@@ -209,7 +210,7 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(Category category, int page, string domainName)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesByCategoryPaged(string type, Category category, int page, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = 10f;
@@ -218,7 +219,7 @@ namespace newsApi.Services.StoryService
             {
                 var stories = await _context.Stories
                     .Include(s => s.ImageDbs)
-                    .Where(s => s.Category == category)
+                    .Where(s => type == "all" ? s.Category == category : s.Category == category && s.Type == type)
                     .OrderByDescending(s => s.PublishTime)
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
@@ -392,6 +393,7 @@ namespace newsApi.Services.StoryService
             story.HtmlData = streamReader.ReadToEnd();
             story.Category = storyUpdateDto.Category;
             story.Title = storyUpdateDto.Title;
+            story.Type = storyUpdateDto.Type;
             story.PublishTime = storyUpdateDto.PublishTime;
             story.Publish = storyUpdateDto.Publish;
             story.UpdateTime = DateTime.Now;
