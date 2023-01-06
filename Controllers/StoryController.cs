@@ -63,10 +63,10 @@ namespace newsApi.Controllers
         }
 
         [HttpGet("page")]
-        public async Task<IActionResult> GetStoriesPaged([FromQuery] int page)
+        public async Task<IActionResult> GetStoriesPaged([FromQuery] string type, [FromQuery] int page)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
-            return Ok(await _storyService.GetStoriesPaged(page, domainName));
+            return Ok(await _storyService.GetStoriesPaged(type, page, domainName));
         }
 
         [HttpPut]

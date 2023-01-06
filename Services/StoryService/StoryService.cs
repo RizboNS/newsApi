@@ -170,7 +170,7 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(int page, string domainName)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(string type, int page, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = 10f;
@@ -179,6 +179,7 @@ namespace newsApi.Services.StoryService
             {
                 var stories = await _context.Stories
                     .Include(s => s.ImageDbs)
+                    .Where(s => type == "all" ? true : s.Type == type)
                     .OrderByDescending(s => s.PublishTime)
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
