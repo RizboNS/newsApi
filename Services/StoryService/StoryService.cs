@@ -174,7 +174,7 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = 10f;
-            //var pageCount = Math.Ceiling(_context.Stories.Count() / pageResult);
+            var pageCount = Math.Ceiling(_context.Stories.Where(s => type == "all" ? true : s.Type == type).Count() / pageResult);
             try
             {
                 var stories = await _context.Stories
@@ -184,8 +184,6 @@ namespace newsApi.Services.StoryService
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
                     .ToListAsync();
-
-                var pageCount = Math.Ceiling(stories.Count() / pageResult);
 
                 serviceResponse.Data = new StoryResponsePagedDto
                 {
@@ -217,7 +215,7 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = 10f;
-            //var pageCount = Math.Ceiling(_context.Stories.Where(s => s.Category == category).Count() / pageResult);
+            var pageCount = Math.Ceiling(_context.Stories.Where(s => type == "all" ? s.Category == category : s.Category == category && s.Type == type).Count() / pageResult);
             try
             {
                 var stories = await _context.Stories
@@ -227,8 +225,6 @@ namespace newsApi.Services.StoryService
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
                     .ToListAsync();
-
-                var pageCount = Math.Ceiling(stories.Count() / pageResult);
 
                 serviceResponse.Data = new StoryResponsePagedDto
                 {
