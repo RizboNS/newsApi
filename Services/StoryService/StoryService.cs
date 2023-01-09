@@ -174,12 +174,12 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = 10f;
-            var pageCount = Math.Ceiling(_context.Stories.Where(s => type == "all" ? true : s.Type == type).Count() / pageResult);
+            var pageCount = Math.Ceiling(_context.Stories.Where(s => type == "all" ? s.Type != "blog" && s.Type != "en-de" : s.Type == type).Count() / pageResult);
             try
             {
                 var stories = await _context.Stories
                     .Include(s => s.ImageDbs)
-                    .Where(s => type == "all" ? true : s.Type == type)
+                    .Where(s => type == "all" ? s.Type != "blog" && s.Type != "en-de" : s.Type == type)
                     .OrderByDescending(s => s.PublishTime)
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
