@@ -17,9 +17,9 @@ namespace newsApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTag(Tag tag)
+        public async Task<IActionResult> CreateTags(List<Tag> tags)
         {
-            var serviceResponse = await _tagService.CreateTag(tag);
+            var serviceResponse = await _tagService.CreateTags(tags);
             if (serviceResponse.Data is null)
             {
                 return BadRequest(serviceResponse);
@@ -35,6 +35,21 @@ namespace newsApi.Controllers
         public async Task<IActionResult> GetTags()
         {
             var serviceResponse = await _tagService.GetTags();
+            if (serviceResponse.Data is null)
+            {
+                return BadRequest(serviceResponse);
+            }
+            else if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteTags(List<Tag> tags)
+        {
+            var serviceResponse = await _tagService.DeleteTags(tags);
             if (serviceResponse.Data is null)
             {
                 return BadRequest(serviceResponse);

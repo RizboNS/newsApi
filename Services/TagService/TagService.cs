@@ -13,25 +13,39 @@ namespace newsApi.Services.TagService
             _context = context;
         }
 
-        public async Task<ServiceResponse<List<Tag>>> CreateTag(Tag tag)
+        public async Task<ServiceResponse<List<Tag>>> CreateTags(List<Tag> newTags)
         {
             var serviceResponse = new ServiceResponse<List<Tag>>();
-            var tags = await GetAllTags();
-            var tagExist = await CheckIfTagExist(tag.TagName);
-
-            if (tagExist)
-            {
-                serviceResponse.Data = tags;
-                serviceResponse.Success = false;
-                serviceResponse.Message = "Tag already exist";
-            }
-
+            var tagsFromDb = await GetAllTags();
+            newTags = newTags
+                        .Select(x => { x.TagName = x.TagName.ToLower(); return x; })
+                        .Where(x => !tagsFromDb.Any(y => y.TagName == x.TagName))
+                        .ToList();
             try
             {
-                await _context.Tags.AddAsync(tag);
+                if (newTags.Count > 0)
+                {
+                    await _context.AddRangeAsync(newTags);
+                    await _context.SaveChangesAsync();
+                    serviceResponse.Data = await GetAllTags();
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
+        public async Task<ServiceResponse<List<Tag>>> DeleteTags(List<Tag> tags)
+        {
+            var serviceResponse = new ServiceResponse<List<Tag>>();
+            try
+            {
+                _context.Tags.RemoveRange(tags);
                 await _context.SaveChangesAsync();
-                tags.Add(tag);
-                serviceResponse.Data = tags;
+                serviceResponse.Data = await GetAllTags();
             }
             catch (Exception ex)
             {
@@ -55,16 +69,6 @@ namespace newsApi.Services.TagService
                 serviceResponse.Message = ex.Message;
             }
             return serviceResponse;
-        }
-
-        private async Task<bool> CheckIfTagExist(string tagName)
-        {
-            var tags = await _context.Tags.ToListAsync();
-            if (tags.Any(t => t.TagName == tagName))
-            {
-                return true;
-            }
-            return false;
         }
 
         private async Task<List<Tag>> GetAllTags()
