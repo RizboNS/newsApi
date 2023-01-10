@@ -53,6 +53,23 @@ namespace newsApi.Controllers
             return Ok(response);
         }
 
+        [HttpGet("titleId/{titleId}")]
+        public async Task<IActionResult> GetStoryByTitleId(string titleId)
+        {
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            var response = await _storyService.GetStoryByTitleId(titleId, domainName);
+
+            if (response.Data == null)
+            {
+                return NotFound(response);
+            }
+            else if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
         // Calling route I keep on forgeting :) https://localhost:7400/api/Story/filter?type=nesto&category=bastina&page=1
         [HttpGet("filter")]
         public async Task<IActionResult> GetStoriesByCategory([FromQuery] string type, [FromQuery] Category category, [FromQuery] int page)

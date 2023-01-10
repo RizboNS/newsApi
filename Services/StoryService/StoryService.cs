@@ -254,6 +254,32 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<StoryResponseDto>> GetStoryByTitleId(string titleId, string domainName)
+        {
+            var serviceResponse = new ServiceResponse<StoryResponseDto>();
+            try
+            {
+                var story = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .FirstOrDefaultAsync(s => s.TitleId == titleId);
+
+                serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
+                if (serviceResponse.Data.ImageDbs != null)
+                {
+                    foreach (var image in serviceResponse.Data.ImageDbs)
+                    {
+                        image.LocationPath = domainName + image.LocationPath;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
         public async Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponseDto>();
