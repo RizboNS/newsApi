@@ -20,7 +20,22 @@ namespace newsApi.Controllers
         public async Task<IActionResult> CreateTag(Tag tag)
         {
             var serviceResponse = await _tagService.CreateTag(tag);
-            if (serviceResponse.Data == null)
+            if (serviceResponse.Data is null)
+            {
+                return BadRequest(serviceResponse);
+            }
+            else if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTags()
+        {
+            var serviceResponse = await _tagService.GetTags();
+            if (serviceResponse.Data is null)
             {
                 return BadRequest(serviceResponse);
             }

@@ -41,6 +41,22 @@ namespace newsApi.Services.TagService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<List<Tag>>> GetTags()
+        {
+            var serviceResponse = new ServiceResponse<List<Tag>>();
+            try
+            {
+                var tags = await GetAllTags();
+                serviceResponse.Data = tags;
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
         private async Task<bool> CheckIfTagExist(string tagName)
         {
             var tags = await _context.Tags.ToListAsync();

@@ -13,5 +13,6 @@
         public DateTime CreatedTime { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time"));
         public DateTime UpdateTime { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time"));
         public List<ImageDb>? ImageDbs { get; set; }
+        public List<Tag>? Tags { get; set; }
     }
 }
