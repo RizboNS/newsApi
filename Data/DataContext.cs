@@ -11,5 +11,6 @@ namespace newsApi.Data
 
         public DbSet<ImageDb> ImageDbs => Set<ImageDb>();
         public DbSet<Story> Stories => Set<Story>();
+        public DbSet<Tag> Tags => Set<Tag>();
     }
 }

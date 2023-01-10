@@ -3,6 +3,7 @@ using newsApi.Data;
 using newsApi.Services.AdminService;
 using newsApi.Services.ImageService;
 using newsApi.Services.StoryService;
+using newsApi.Services.TagService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddCors(
     p =>
         p.AddPolicy("corspolicy",
