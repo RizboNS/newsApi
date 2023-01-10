@@ -31,6 +31,7 @@ namespace newsApi.Services.StoryService
             var serviceResponse = new ServiceResponse<StoryCreatedDto>();
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
+
             var savedImages = new List<ImageDto>();
             var imgNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
 
@@ -98,6 +99,7 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.Type = storyCreateDto.Type;
             storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
             storyCreatedDto.Publish = storyCreateDto.Publish;
+            storyCreatedDto.TitleId = CreateTitleId(storyCreatedDto.Title);
 
             Story story = _mapper.Map<Story>(storyCreatedDto);
 
@@ -398,6 +400,7 @@ namespace newsApi.Services.StoryService
             story.PublishTime = storyUpdateDto.PublishTime;
             story.Publish = storyUpdateDto.Publish;
             story.UpdateTime = DateTime.Now;
+            story.TitleId = CreateTitleId(story.Title);
 
             try
             {
@@ -488,6 +491,11 @@ namespace newsApi.Services.StoryService
             }
 
             return path;
+        }
+
+        private string CreateTitleId(string title)
+        {
+            return title.ToLower().Replace(" ", "-").Replace("?", "").Replace("!", "").Replace(":", "").Replace(";", "").Replace(",", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("č", "c").Replace("ć", "c").Replace("š", "s").Replace("ž", "z").Replace("đ", "dj");
         }
     }
 }
