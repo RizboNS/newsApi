@@ -71,6 +71,27 @@ namespace newsApi.Services.TagService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<List<Tag>>> ModifyTags(List<Tag> newTags)
+        {
+            var serviceResponse = new ServiceResponse<List<Tag>>();
+            newTags = newTags.Select(x => { x.TagName = x.TagName.ToLower(); return x; }).ToList();
+            try
+            {
+                var currentTags = await GetAllTags();
+                _context.Tags.RemoveRange(currentTags);
+                await _context.Tags.AddRangeAsync(newTags);
+                await _context.SaveChangesAsync();
+
+                serviceResponse.Data = await GetAllTags();
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
+            return serviceResponse;
+        }
+
         private async Task<List<Tag>> GetAllTags()
         {
             var tags = await _context.Tags.ToListAsync();
