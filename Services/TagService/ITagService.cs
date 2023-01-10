@@ -2,8 +2,8 @@
 
 namespace newsApi.Services.TagService
 {
-    public interface ITag
+    public interface ITagService
     {
-        Task<ServiceResponse<List<Tag>>> CreateTag(string tag);
+        Task<ServiceResponse<List<TagService>>> CreateTag(string tag);
     }
 }
