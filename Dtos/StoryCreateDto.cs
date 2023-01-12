@@ -11,5 +11,6 @@ namespace newsApi.Dtos
         public string HtmlData { get; set; } = string.Empty;
         public DateTime PublishTime { get; set; }
         public bool Publish { get; set; }
+        public List<Tag>? Tags { get; set; }
     }
 }

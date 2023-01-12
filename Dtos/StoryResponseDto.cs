@@ -15,5 +15,6 @@ namespace newsApi.Dtos
         public DateTime PublishTime { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdateTime { get; set; }
+        public List<Tag>? Tags { get; set; }
     }
 }

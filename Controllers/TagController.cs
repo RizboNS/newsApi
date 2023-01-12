@@ -20,7 +20,7 @@ namespace newsApi.Controllers
         public async Task<IActionResult> ModifyTags(List<Tag> tags)
         {
             var serviceResponse = await _tagService.ModifyTags(tags);
-            if (serviceResponse.Data is null || !serviceResponse.Success)
+            if (!serviceResponse.Success)
             {
                 return BadRequest(serviceResponse);
             }
@@ -42,7 +42,7 @@ namespace newsApi.Controllers
         public async Task<IActionResult> GetTags()
         {
             var serviceResponse = await _tagService.GetTags();
-            if (serviceResponse.Data is null || serviceResponse.Data.Count == 0 || !serviceResponse.Success)
+            if (!serviceResponse.Success)
             {
                 return BadRequest(serviceResponse);
             }
@@ -53,7 +53,7 @@ namespace newsApi.Controllers
         public async Task<IActionResult> DeleteTags(List<Tag> tags)
         {
             var serviceResponse = await _tagService.DeleteTags(tags);
-            if (serviceResponse.Data is null || !serviceResponse.Success)
+            if (!serviceResponse.Success)
             {
                 return BadRequest(serviceResponse);
             }

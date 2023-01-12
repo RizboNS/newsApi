@@ -1,4 +1,5 @@
-﻿using newsApi.Models;
+﻿using newsApi.Dtos;
+using newsApi.Models;
 
 namespace newsApi.Services.TagService
 {
@@ -11,5 +12,9 @@ namespace newsApi.Services.TagService
         Task<ServiceResponse<List<Tag>>> DeleteTags(List<Tag> tags);
 
         Task<ServiceResponse<List<Tag>>> ModifyTags(List<Tag> tags);
+
+        Task<MethodResponse> CheckTagsAndCreateIfNotExist(List<Tag> tags, Story story);
+
+        Task<ServiceResponse<List<Tag>>> GetAllTagsAsociatedWithStory(Story story);
     }
 }

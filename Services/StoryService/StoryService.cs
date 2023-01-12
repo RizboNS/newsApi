@@ -5,6 +5,7 @@ using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
 using newsApi.Services.ImageService;
+using newsApi.Services.TagService;
 
 namespace newsApi.Services.StoryService
 {
@@ -14,14 +15,16 @@ namespace newsApi.Services.StoryService
         private readonly IImageService _imageService;
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ITagService _tagService;
 
         public StoryService(IWebHostEnvironment environment,
-            IImageService imageService, DataContext context, IMapper mapper)
+            IImageService imageService, DataContext context, IMapper mapper, ITagService tagService)
         {
             _environment = environment;
             _imageService = imageService;
             _context = context;
             _mapper = mapper;
+            _tagService = tagService;
         }
 
         public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
@@ -103,6 +106,23 @@ namespace newsApi.Services.StoryService
 
             Story story = _mapper.Map<Story>(storyCreatedDto);
 
+            if (storyCreateDto.Tags is not null)
+            {
+                var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyCreateDto.Tags, story);
+                if (!methodResponse.Success)
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = methodResponse.Message;
+                    return serviceResponse;
+                }
+            }
+            else
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Tags are required.";
+                return serviceResponse;
+            }
+
             try
             {
                 _context.Add(story);
@@ -160,6 +180,15 @@ namespace newsApi.Services.StoryService
                 var stories = await _context.Stories
                     .Include(s => s.ImageDbs)
                     .ToListAsync();
+
+                foreach (var story in stories)
+                {
+                    var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
+                    if (sp.Success)
+                    {
+                        story.Tags = sp.Data;
+                    }
+                }
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
             }
