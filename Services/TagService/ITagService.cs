@@ -13,7 +13,7 @@ namespace newsApi.Services.TagService
 
         Task<ServiceResponse<List<Tag>>> ModifyTags(List<Tag> tags);
 
-        Task<MethodResponse> CheckTagsAndCreateIfNotExist(List<Tag> tags, Story story);
+        Task<ServiceResponse<List<Tag>>> CheckTagsAndCreateIfNotExist(List<Tag> tags, Guid storyId);
 
         Task<ServiceResponse<List<Tag>>> GetAllTagsAsociatedWithStory(Story story);
     }

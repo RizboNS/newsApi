@@ -14,35 +14,29 @@ namespace newsApi.Services.TagService
             _context = context;
         }
 
-        public async Task<MethodResponse> CheckTagsAndCreateIfNotExist(List<Tag> tags, Story story)
+        public async Task<ServiceResponse<List<Tag>>> CheckTagsAndCreateIfNotExist(List<Tag> tags, Guid storyId)
         {
-            var methodResponse = new MethodResponse();
+            var serviceResponse = new ServiceResponse<List<Tag>>();
             try
             {
+                // check if tags exist in db and create them if not but save at end of the foor lop not at each time tag is created
                 foreach (var tag in tags)
                 {
-                    if (!_context.Tags.Any(t => t.TagName == tag.TagName))
+                    var tagFromDb = await _context.Tags.FirstOrDefaultAsync(t => t.TagName == tag.TagName);
+                    if (tagFromDb == null)
                     {
-                        _context.Tags.Add(tag);
-                    }
-                    if (tag.Stories == null)
-                    {
-                        tag.Stories = new List<Story> { story };
-                    }
-                    else if (!tag.Stories.Any(s => s.Id == story.Id))
-                    {
-                        tag.Stories.Add(story);
+                        await _context.Tags.AddAsync(tag);
                     }
                 }
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                methodResponse.Success = false;
-                methodResponse.Message = ex.Message;
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
             }
 
-            return methodResponse;
+            return serviceResponse;
         }
 
         public async Task<ServiceResponse<List<Tag>>> CreateTags(List<Tag> newTags)
@@ -92,11 +86,12 @@ namespace newsApi.Services.TagService
             var serviceResponse = new ServiceResponse<List<Tag>>();
             try
             {
-                var tags = await _context.Tags
-                                    .Where(t => t.Stories.Any(s => s.Id == story.Id))
-                                    .ToListAsync();
+                //var tags = await _context.Tags
+                //                    .Where(t => t.Stories.Any(s => s.Id == story.Id))
+                //                    .ToListAsync();
+                // get all tags asociated with story in StoryTag table in the database
 
-                serviceResponse.Data = tags;
+                //serviceResponse.Data = tags;
             }
             catch (Exception ex)
             {

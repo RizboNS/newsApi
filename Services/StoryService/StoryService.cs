@@ -91,24 +91,9 @@ namespace newsApi.Services.StoryService
                 }
             }
 
-            MemoryStream memoryStream = new MemoryStream();
-            htmlDoc.Save(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            StreamReader streamReader = new StreamReader(memoryStream);
-
-            storyCreatedDto.HtmlData = streamReader.ReadToEnd();
-            storyCreatedDto.Category = storyCreateDto.Category;
-            storyCreatedDto.Title = storyCreateDto.Title;
-            storyCreatedDto.Type = storyCreateDto.Type;
-            storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
-            storyCreatedDto.Publish = storyCreateDto.Publish;
-            storyCreatedDto.TitleId = CreateTitleId(storyCreatedDto.Title);
-
-            Story story = _mapper.Map<Story>(storyCreatedDto);
-
             if (storyCreateDto.Tags is not null)
             {
-                var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyCreateDto.Tags, story);
+                var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyCreateDto.Tags, storyCreatedDto.Id);
                 if (!methodResponse.Success)
                 {
                     serviceResponse.Success = false;
@@ -123,9 +108,47 @@ namespace newsApi.Services.StoryService
                 return serviceResponse;
             }
 
+            MemoryStream memoryStream = new MemoryStream();
+            htmlDoc.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            StreamReader streamReader = new StreamReader(memoryStream);
+
+            storyCreatedDto.HtmlData = streamReader.ReadToEnd();
+            storyCreatedDto.Category = storyCreateDto.Category;
+            storyCreatedDto.Title = storyCreateDto.Title;
+            storyCreatedDto.Type = storyCreateDto.Type;
+            storyCreatedDto.PublishTime = storyCreateDto.PublishTime;
+            storyCreatedDto.Publish = storyCreateDto.Publish;
+            storyCreatedDto.TitleId = CreateTitleId(storyCreatedDto.Title);
+
+            Story story = _mapper.Map<Story>(storyCreatedDto);
+            story.StoryTags = new List<StoryTag>();
+            foreach (var tag in storyCreateDto.Tags)
+            {
+                story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
+            }
+
+            //if (storyCreateDto.Tags is not null)
+            //{
+            //    var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyCreateDto.Tags, story);
+            //    if (!methodResponse.Success)
+            //    {
+            //        serviceResponse.Success = false;
+            //        serviceResponse.Message = methodResponse.Message;
+            //        return serviceResponse;
+            //    }
+            //}
+            //else
+            //{
+            //    serviceResponse.Success = false;
+            //    serviceResponse.Message = "Tags are required.";
+            //    return serviceResponse;
+            //}
+
             try
             {
                 _context.Add(story);
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -178,17 +201,18 @@ namespace newsApi.Services.StoryService
             try
             {
                 var stories = await _context.Stories
+                    .Include(s => s.StoryTags) // changed
                     .Include(s => s.ImageDbs)
                     .ToListAsync();
 
-                foreach (var story in stories)
-                {
-                    var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
-                    if (sp.Success)
-                    {
-                        story.Tags = sp.Data;
-                    }
-                }
+                //foreach (var story in stories)
+                //{
+                //    var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
+                //    if (sp.Success)
+                //    {
+                //        //story.Tags = sp.Data;
+                //    }
+                //}
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
             }
@@ -325,6 +349,13 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
                 }
+
+                var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
+                if (sp.Success)
+                {
+                    //story.Tags = sp.Data;
+                }
+
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
             }
             catch (Exception ex)
@@ -456,6 +487,23 @@ namespace newsApi.Services.StoryService
             story.Publish = storyUpdateDto.Publish;
             story.UpdateTime = DateTime.Now;
             story.TitleId = CreateTitleId(story.Title);
+
+            if (storyUpdateDto.Tags is not null)
+            {
+                var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyUpdateDto.Tags, storyUpdateDto.Id);
+                if (!methodResponse.Success)
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.Message = methodResponse.Message;
+                    return serviceResponse;
+                }
+            }
+            else
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = "Tags are required.";
+                return serviceResponse;
+            }
 
             try
             {

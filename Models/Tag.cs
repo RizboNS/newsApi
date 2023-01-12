@@ -8,6 +8,6 @@ namespace newsApi.Models
         [Key, Column(Order = 0), Required, MinLength(2), MaxLength(50)]
         public string TagName { get; set; } = string.Empty;
 
-        public List<Story> Stories { get; set; } = new List<Story>();
+        public ICollection<StoryTag> StoryTags { get; set; } = new List<StoryTag>();
     }
 }
