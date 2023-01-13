@@ -122,28 +122,14 @@ namespace newsApi.Services.StoryService
             storyCreatedDto.TitleId = CreateTitleId(storyCreatedDto.Title);
 
             Story story = _mapper.Map<Story>(storyCreatedDto);
+
             story.StoryTags = new List<StoryTag>();
             foreach (var tag in storyCreateDto.Tags)
             {
                 story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
             }
 
-            //if (storyCreateDto.Tags is not null)
-            //{
-            //    var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyCreateDto.Tags, story);
-            //    if (!methodResponse.Success)
-            //    {
-            //        serviceResponse.Success = false;
-            //        serviceResponse.Message = methodResponse.Message;
-            //        return serviceResponse;
-            //    }
-            //}
-            //else
-            //{
-            //    serviceResponse.Success = false;
-            //    serviceResponse.Message = "Tags are required.";
-            //    return serviceResponse;
-            //}
+            storyCreatedDto.StoryTags = story.StoryTags;
 
             try
             {
@@ -200,19 +186,16 @@ namespace newsApi.Services.StoryService
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
             try
             {
-                var stories = await _context.Stories
-                    .Include(s => s.StoryTags) // changed
-                    .Include(s => s.ImageDbs)
-                    .ToListAsync();
+                //var stories = await _context.Stories
+                //    .Include(s => s.ImageDbs)
+                //    .ToListAsync();
 
-                //foreach (var story in stories)
-                //{
-                //    var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
-                //    if (sp.Success)
-                //    {
-                //        //story.Tags = sp.Data;
-                //    }
-                //}
+                // get all stories including imageDbs and Tags
+                var stories = await _context.Stories
+                    .Include(s => s.ImageDbs)
+                    .Include(s => s.StoryTags)
+                    .ThenInclude(st => st.Tag)
+                    .ToListAsync();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
             }
@@ -339,8 +322,15 @@ namespace newsApi.Services.StoryService
 
             try
             {
+                //var story = await _context.Stories
+                //    .Include(s => s.ImageDbs)
+                //    .FirstOrDefaultAsync(s => s.Id == storyId);
+
+                // get story including imageDbs and Tags
                 var story = await _context.Stories
                     .Include(s => s.ImageDbs)
+                    .Include(s => s.StoryTags)
+                    .ThenInclude(st => st.Tag)
                     .FirstOrDefaultAsync(s => s.Id == storyId);
 
                 if (story == null)
@@ -348,12 +338,6 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Success = false;
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
-                }
-
-                var sp = await _tagService.GetAllTagsAsociatedWithStory(story);
-                if (sp.Success)
-                {
-                    //story.Tags = sp.Data;
                 }
 
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);

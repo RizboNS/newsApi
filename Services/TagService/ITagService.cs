@@ -15,6 +15,6 @@ namespace newsApi.Services.TagService
 
         Task<ServiceResponse<List<Tag>>> CheckTagsAndCreateIfNotExist(List<Tag> tags, Guid storyId);
 
-        Task<ServiceResponse<List<Tag>>> GetAllTagsAsociatedWithStory(Story story);
+        //Task<ServiceResponse<ICollection<StoryTag>>> GetAllTagsAsociatedWithStory(Story story);
     }
 }

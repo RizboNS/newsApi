@@ -19,7 +19,6 @@ namespace newsApi.Services.TagService
             var serviceResponse = new ServiceResponse<List<Tag>>();
             try
             {
-                // check if tags exist in db and create them if not but save at end of the foor lop not at each time tag is created
                 foreach (var tag in tags)
                 {
                     var tagFromDb = await _context.Tags.FirstOrDefaultAsync(t => t.TagName == tag.TagName);
@@ -81,25 +80,26 @@ namespace newsApi.Services.TagService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<List<Tag>>> GetAllTagsAsociatedWithStory(Story story)
-        {
-            var serviceResponse = new ServiceResponse<List<Tag>>();
-            try
-            {
-                //var tags = await _context.Tags
-                //                    .Where(t => t.Stories.Any(s => s.Id == story.Id))
-                //                    .ToListAsync();
-                // get all tags asociated with story in StoryTag table in the database
+        //public async Task<ICollection<StoryTag>> GetAllTagsAsociatedWithStory(Story story)
+        //{
+        //    //var serviceResponse = new ServiceResponse<ICollection<StoryTag>>();
+        //    //try
+        //    //{
+        //    //    // get all tags from db asoiciated with story from many-to-many relationship
+        //    //    var tags = await _context.StoryTags
+        //    //        .Where(st => st.StoryId == story.Id)
+        //    //        .Include(st => st.Tag)
+        //    //        .ToListAsync();
 
-                //serviceResponse.Data = tags;
-            }
-            catch (Exception ex)
-            {
-                serviceResponse.Success = false;
-                serviceResponse.Message = ex.Message;
-            }
-            return serviceResponse;
-        }
+        //    //    serviceResponse.Data = storyTags;
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    serviceResponse.Success = false;
+        //    //    serviceResponse.Message = ex.Message;
+        //    //}
+        //    //return serviceResponse;
+        //}
 
         public async Task<ServiceResponse<List<Tag>>> GetTags()
         {
