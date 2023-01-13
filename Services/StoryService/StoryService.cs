@@ -194,12 +194,12 @@ namespace newsApi.Services.StoryService
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
             try
             {
-                var stories = _context.Stories
+                var stories = await _context.Stories
                     .Include(s => s.StoryTags)
                     .ThenInclude(st => st.Tag)
                     .Include(s => s.ImageDbs)
                     .AsSplitQuery()
-                    .ToList();
+                    .ToListAsync();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
             }
@@ -325,15 +325,11 @@ namespace newsApi.Services.StoryService
 
             try
             {
-                //var story = await _context.Stories
-                //    .Include(s => s.ImageDbs)
-                //    .FirstOrDefaultAsync(s => s.Id == storyId);
-
-                // get story including imageDbs and Tags
                 var story = await _context.Stories
                     .Include(s => s.ImageDbs)
                     .Include(s => s.StoryTags)
                     .ThenInclude(st => st.Tag)
+                    .AsSplitQuery()
                     .FirstOrDefaultAsync(s => s.Id == storyId);
 
                 if (story == null)
