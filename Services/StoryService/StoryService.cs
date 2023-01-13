@@ -1,11 +1,19 @@
 ﻿using AutoMapper;
 using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
 using newsApi.Services.ImageService;
 using newsApi.Services.TagService;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Diagnostics;
+using System.Dynamic;
+using System.Linq;
+using System.Resources;
+using System.Runtime.Intrinsics.X86;
+using System;
 
 namespace newsApi.Services.StoryService
 {
@@ -190,6 +198,7 @@ namespace newsApi.Services.StoryService
                     .Include(s => s.StoryTags)
                     .ThenInclude(st => st.Tag)
                     .Include(s => s.ImageDbs)
+                    .AsSplitQuery()
                     .ToList();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
@@ -199,7 +208,6 @@ namespace newsApi.Services.StoryService
                 serviceResponse.Success = false;
                 serviceResponse.Message = ex.Message;
             }
-
             return serviceResponse;
         }
 
@@ -211,12 +219,12 @@ namespace newsApi.Services.StoryService
             try
             {
                 var stories = await _context.Stories
-                    .Include(s => s.ImageDbs)
-                    .Where(s => type == "all" ? s.Type != "blog" && s.Type != "en-de" : s.Type == type)
-                    .OrderByDescending(s => s.PublishTime)
-                    .Skip((page - 1) * (int)pageResult)
-                    .Take((int)pageResult)
-                    .ToListAsync();
+                .Include(s => s.ImageDbs)
+                .Where(s => type == "all" ? s.Type != "blog" && s.Type != "en-de" : s.Type == type)
+                .OrderByDescending(s => s.PublishTime)
+                .Skip((page - 1) * (int)pageResult)
+                .Take((int)pageResult)
+                .ToListAsync();
 
                 serviceResponse.Data = new StoryResponsePagedDto
                 {
