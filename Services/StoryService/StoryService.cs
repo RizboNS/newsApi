@@ -186,16 +186,11 @@ namespace newsApi.Services.StoryService
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
             try
             {
-                //var stories = await _context.Stories
-                //    .Include(s => s.ImageDbs)
-                //    .ToListAsync();
-
-                // get all stories including imageDbs and Tags
-                var stories = await _context.Stories
-                    .Include(s => s.ImageDbs)
+                var stories = _context.Stories
                     .Include(s => s.StoryTags)
                     .ThenInclude(st => st.Tag)
-                    .ToListAsync();
+                    .Include(s => s.ImageDbs)
+                    .ToList();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
             }
