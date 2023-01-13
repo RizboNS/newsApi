@@ -10,9 +10,8 @@ namespace newsApi.Dtos
         public string Type { get; set; } = string.Empty;
         public Category Category { get; set; }
         public string HtmlData { get; set; } = string.Empty;
-        public string IconPath { get; set; } = string.Empty;
         public DateTime PublishTime { get; set; }
         public bool Publish { get; set; }
-        public ICollection<StoryTag> StoryTags { get; set; } = new List<StoryTag>();
+        public List<string> TagNames { get; set; } = new List<string>();
     }
 }

@@ -22,11 +22,11 @@ namespace newsApi.Controllers
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             var serviceResponse = await _storyService.CreateStory(storyCreateDto, domainName);
-            if (serviceResponse.Data == null)
+            if (!serviceResponse.Success)
             {
                 return BadRequest(serviceResponse);
             }
-            return CreatedAtRoute(nameof(GetStory), new { storyId = serviceResponse.Data.Id }, serviceResponse);
+            return CreatedAtRoute(nameof(GetStory), new { storyId = serviceResponse.Data }, serviceResponse);
         }
 
         [HttpGet]

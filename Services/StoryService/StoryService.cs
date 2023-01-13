@@ -35,11 +35,11 @@ namespace newsApi.Services.StoryService
             _tagService = tagService;
         }
 
-        public async Task<ServiceResponse<StoryCreatedDto>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
+        public async Task<ServiceResponse<Guid>> CreateStory(StoryCreateDto storyCreateDto, string domainName)
         {
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(storyCreateDto.HtmlData);
-            var serviceResponse = new ServiceResponse<StoryCreatedDto>();
+            var serviceResponse = new ServiceResponse<Guid>();
             var storyCreatedDto = new StoryCreatedDto();
             storyCreatedDto.Id = Guid.NewGuid();
 
@@ -137,8 +137,6 @@ namespace newsApi.Services.StoryService
                 story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
             }
 
-            storyCreatedDto.StoryTags = story.StoryTags;
-
             try
             {
                 _context.Add(story);
@@ -159,7 +157,7 @@ namespace newsApi.Services.StoryService
                 return serviceResponse;
             }
 
-            serviceResponse.Data = storyCreatedDto;
+            serviceResponse.Data = story.Id;
             return serviceResponse;
         }
 
