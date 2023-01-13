@@ -202,6 +202,18 @@ namespace newsApi.Services.StoryService
                     .ToListAsync();
 
                 serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
+
+                foreach (var story in serviceResponse.Data)
+                {
+                    if (story.ImageDbs != null)
+                    {
+                        for (int i = 0; i < story.ImageDbs.Count; i++)
+                        {
+                            var imageLocation = story.ImageDbs[i];
+                            story.ImageDbs[i] = domainName + imageLocation;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -237,9 +249,10 @@ namespace newsApi.Services.StoryService
                 {
                     if (story.ImageDbs != null)
                     {
-                        foreach (var image in story.ImageDbs)
+                        for (int i = 0; i < story.ImageDbs.Count; i++)
                         {
-                            image.LocationPath = domainName + image.LocationPath;
+                            var imageLocation = story.ImageDbs[i];
+                            story.ImageDbs[i] = domainName + imageLocation;
                         }
                     }
                 }
@@ -278,9 +291,10 @@ namespace newsApi.Services.StoryService
                 {
                     if (story.ImageDbs != null)
                     {
-                        foreach (var image in story.ImageDbs)
+                        for (int i = 0; i < story.ImageDbs.Count; i++)
                         {
-                            image.LocationPath = domainName + image.LocationPath;
+                            var imageLocation = story.ImageDbs[i];
+                            story.ImageDbs[i] = domainName + imageLocation;
                         }
                     }
                 }
@@ -305,10 +319,11 @@ namespace newsApi.Services.StoryService
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
                 if (serviceResponse.Data.ImageDbs != null)
                 {
-                    foreach (var image in serviceResponse.Data.ImageDbs)
-                    {
-                        image.LocationPath = domainName + image.LocationPath;
-                    }
+                    //for (int i = 0; i < story.ImageDbs.Count; i++)
+                    //{
+                    //    var imageLocation = story.ImageDbs[i];
+                    //    story.ImageDbs[i] = domainName + imageLocation;
+                    //}
                 }
             }
             catch (Exception ex)

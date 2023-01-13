@@ -11,7 +11,7 @@ namespace newsApi.Dtos
         public Category Category { get; set; }
         public bool Publish { get; set; }
         public string HtmlData { get; set; } = string.Empty;
-        public List<ImageDb>? ImageDbs { get; set; }
+        public List<string> ImageDbs { get; set; } = new List<string>();
         public DateTime PublishTime { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime UpdateTime { get; set; }
