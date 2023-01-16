@@ -364,9 +364,9 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponseDto>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName)
+        public async Task<ServiceResponse<Guid>> UpdateStory(StoryUpdateDto storyUpdateDto, string domainName)
         {
-            var serviceResponse = new ServiceResponse<StoryResponseDto>();
+            var serviceResponse = new ServiceResponse<Guid>();
             var savedImages = new List<ImageDto>();
             var story = await _context.Stories
                 .Include(s => s.ImageDbs)
@@ -476,15 +476,6 @@ namespace newsApi.Services.StoryService
             memoryStream.Seek(0, SeekOrigin.Begin);
             StreamReader streamReader = new StreamReader(memoryStream);
 
-            story.HtmlData = streamReader.ReadToEnd();
-            story.Category = storyUpdateDto.Category;
-            story.Title = storyUpdateDto.Title;
-            story.Type = storyUpdateDto.Type;
-            story.PublishTime = storyUpdateDto.PublishTime;
-            story.Publish = storyUpdateDto.Publish;
-            story.UpdateTime = DateTime.Now;
-            story.TitleId = CreateTitleId(story.Title);
-
             if (storyUpdateDto.Tags is not null)
             {
                 var methodResponse = await _tagService.CheckTagsAndCreateIfNotExist(storyUpdateDto.Tags, storyUpdateDto.Id);
@@ -502,11 +493,27 @@ namespace newsApi.Services.StoryService
                 return serviceResponse;
             }
 
+            story.HtmlData = streamReader.ReadToEnd();
+            story.Category = storyUpdateDto.Category;
+            story.Title = storyUpdateDto.Title;
+            story.Type = storyUpdateDto.Type;
+            story.PublishTime = storyUpdateDto.PublishTime;
+            story.Publish = storyUpdateDto.Publish;
+            story.UpdateTime = DateTime.Now;
+            story.TitleId = CreateTitleId(story.Title);
+
+            //story.StoryTags = new List<StoryTag>();
+            //foreach (var tag in storyUpdateDto.Tags)
+            //{
+            //    story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
+            //}
+
+            // to do - compare if old tag list is same with new and update acordingly....
+
             try
             {
                 await _context.SaveChangesAsync();
-                StoryResponseDto storyResponseDto = _mapper.Map<StoryResponseDto>(story);
-                serviceResponse.Data = storyResponseDto;
+                serviceResponse.Data = story.Id;
             }
             catch (Exception ex)
             {
