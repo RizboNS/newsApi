@@ -315,13 +315,14 @@ namespace newsApi.Services.StoryService
                     .FirstOrDefaultAsync(s => s.TitleId == titleId);
 
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
-                if (serviceResponse.Data.ImageDbs != null)
+                if (serviceResponse.Data.ImageDbs is not null)
                 {
-                    //for (int i = 0; i < story.ImageDbs.Count; i++)
-                    //{
-                    //    var imageLocation = story.ImageDbs[i];
-                    //    story.ImageDbs[i] = domainName + imageLocation;
-                    //}
+                    // to be tested
+                    for (int i = 0; i < serviceResponse.Data.ImageDbs.Count; i++)
+                    {
+                        var imageLocation = serviceResponse.Data.ImageDbs[i];
+                        serviceResponse.Data.ImageDbs[i] = domainName + imageLocation;
+                    }
                 }
             }
             catch (Exception ex)
