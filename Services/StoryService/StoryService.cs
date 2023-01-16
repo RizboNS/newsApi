@@ -352,7 +352,6 @@ namespace newsApi.Services.StoryService
                     serviceResponse.Message = "Story not found.";
                     return serviceResponse;
                 }
-
                 serviceResponse.Data = _mapper.Map<StoryResponseDto>(story);
             }
             catch (Exception ex)
