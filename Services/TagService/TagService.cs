@@ -80,27 +80,6 @@ namespace newsApi.Services.TagService
             return serviceResponse;
         }
 
-        //public async Task<ICollection<StoryTag>> GetAllTagsAsociatedWithStory(Story story)
-        //{
-        //    //var serviceResponse = new ServiceResponse<ICollection<StoryTag>>();
-        //    //try
-        //    //{
-        //    //    // get all tags from db asoiciated with story from many-to-many relationship
-        //    //    var tags = await _context.StoryTags
-        //    //        .Where(st => st.StoryId == story.Id)
-        //    //        .Include(st => st.Tag)
-        //    //        .ToListAsync();
-
-        //    //    serviceResponse.Data = storyTags;
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    serviceResponse.Success = false;
-        //    //    serviceResponse.Message = ex.Message;
-        //    //}
-        //    //return serviceResponse;
-        //}
-
         public async Task<ServiceResponse<List<Tag>>> GetTags()
         {
             var serviceResponse = new ServiceResponse<List<Tag>>();
