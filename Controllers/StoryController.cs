@@ -91,13 +91,9 @@ namespace newsApi.Controllers
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             var serviceResponse = await _storyService.UpdateStory(storyUpdateDto, domainName);
-            if (serviceResponse.Data == null)
-            {
-                return BadRequest(serviceResponse);
-            }
             if (!serviceResponse.Success)
             {
-                return NotFound(serviceResponse);
+                return BadRequest(serviceResponse);
             }
             return Ok(serviceResponse);
         }
