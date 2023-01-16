@@ -134,7 +134,7 @@ namespace newsApi.Services.StoryService
             story.StoryTags = new List<StoryTag>();
             foreach (var tag in storyCreateDto.Tags)
             {
-                story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
+                story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName.ToLower() });
             }
 
             try
@@ -190,48 +190,34 @@ namespace newsApi.Services.StoryService
         public async Task<ServiceResponse<List<StoryResponseDto>>> GetStories(string domainName)
         {
             var serviceResponse = new ServiceResponse<List<StoryResponseDto>>();
-            //try
-            //{
-            var stories = await _context.Stories
+            try
+            {
+                var stories = await _context.Stories
                 .Include(s => s.StoryTags)
                 .ThenInclude(st => st.Tag)
                 .Include(s => s.ImageDbs)
                 .AsSplitQuery()
                 .ToListAsync();
 
-            serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
-            //foreach (var story in stories)
-            //{
-            //    if (story.StoryTags.Count > 0)
-            //    {
-            //        foreach (var storyTag in story.StoryTags)
-            //        {
-            //            var storyResponseDto = serviceResponse.Data.FirstOrDefault(s => s.Id == story.Id);
-            //            if (storyResponseDto is not null && storyTag.Tag.TagValue is not null)
-            //            {
-            //                storyResponseDto.TagNames.Add(storyTag.Tag.TagValue);
-            //            }
-            //        }
-            //    }
-            //}
+                serviceResponse.Data = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories);
 
-            foreach (var story in serviceResponse.Data)
-            {
-                if (story.ImageDbs != null)
+                foreach (var story in serviceResponse.Data)
                 {
-                    for (int i = 0; i < story.ImageDbs.Count; i++)
+                    if (story.ImageDbs != null)
                     {
-                        var imageLocation = story.ImageDbs[i];
-                        story.ImageDbs[i] = domainName + imageLocation;
+                        for (int i = 0; i < story.ImageDbs.Count; i++)
+                        {
+                            var imageLocation = story.ImageDbs[i];
+                            story.ImageDbs[i] = domainName + imageLocation;
+                        }
                     }
                 }
             }
-            //}
-            //catch (Exception ex)
-            //{
-            //    serviceResponse.Success = false;
-            //    serviceResponse.Message = ex.Message;
-            //}
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
             return serviceResponse;
         }
 
