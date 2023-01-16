@@ -370,6 +370,9 @@ namespace newsApi.Services.StoryService
             var savedImages = new List<ImageDto>();
             var story = await _context.Stories
                 .Include(s => s.ImageDbs)
+                .Include(s => s.StoryTags)
+                .ThenInclude(st => st.Tag)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(s => s.Id == storyUpdateDto.Id);
             if (story == null)
             {
@@ -510,7 +513,8 @@ namespace newsApi.Services.StoryService
             // check if tags count is greater than 0 and then find if tags needs to be deleted...
             if (story.StoryTags.Count > 0)
             {
-                foreach (var storyTag in story.StoryTags)
+                var storyTagsCopy = new List<StoryTag>(story.StoryTags);
+                foreach (var storyTag in storyTagsCopy)
                 {
                     var tag = storyUpdateDto.Tags.FirstOrDefault(t => t.TagName == storyTag.TagName);
                     if (tag is null)
