@@ -9,12 +9,10 @@ namespace newsApi.Services.TagService
     public class TagService : ITagService
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
 
-        public TagService(DataContext context, IMapper mapper)
+        public TagService(DataContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<ServiceResponse<List<Tag>>> CheckTagsAndCreateIfNotExist(List<Tag> tags, Guid storyId)
@@ -27,6 +25,11 @@ namespace newsApi.Services.TagService
                     var tagFromDb = await _context.Tags.FirstOrDefaultAsync(t => t.TagName == tag.TagName);
                     if (tagFromDb == null)
                     {
+                        if (tag.TagValue == string.Empty)
+                        {
+                            tag.TagValue = tag.TagName;
+                            tag.TagName = tag.TagName.ToLower();
+                        }
                         await _context.Tags.AddAsync(tag);
                     }
                 }
@@ -38,31 +41,6 @@ namespace newsApi.Services.TagService
                 serviceResponse.Message = ex.Message;
             }
 
-            return serviceResponse;
-        }
-
-        public async Task<ServiceResponse<List<Tag>>> CreateTags(List<Tag> newTags)
-        {
-            var serviceResponse = new ServiceResponse<List<Tag>>();
-            var tagsFromDb = await GetAllTags();
-            newTags = newTags
-                        .Select(x => { x.TagName = x.TagName.ToLower(); return x; })
-                        .Where(x => !tagsFromDb.Any(y => y.TagName == x.TagName))
-                        .ToList();
-            try
-            {
-                if (newTags.Count > 0)
-                {
-                    await _context.AddRangeAsync(newTags);
-                    await _context.SaveChangesAsync();
-                    serviceResponse.Data = await GetAllTags();
-                }
-            }
-            catch (Exception ex)
-            {
-                serviceResponse.Success = false;
-                serviceResponse.Message = ex.Message;
-            }
             return serviceResponse;
         }
 

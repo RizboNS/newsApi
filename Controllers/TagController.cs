@@ -28,17 +28,6 @@ namespace newsApi.Controllers
             return Ok(serviceResponse);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateTags(List<Tag> tags)
-        {
-            var serviceResponse = await _tagService.CreateTags(tags);
-            if (serviceResponse.Data is null || !serviceResponse.Success)
-            {
-                return BadRequest(serviceResponse);
-            }
-            return Ok(serviceResponse);
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetTags()
         {
