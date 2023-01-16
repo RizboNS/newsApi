@@ -530,7 +530,7 @@ namespace newsApi.Services.StoryService
                 var tagExists = story.StoryTags.Any(t => t.TagName == tag.TagName);
                 if (!tagExists)
                 {
-                    story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
+                    story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName.ToLower() });
                 }
             }
 
