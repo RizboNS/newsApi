@@ -502,13 +502,34 @@ namespace newsApi.Services.StoryService
             story.UpdateTime = DateTime.Now;
             story.TitleId = CreateTitleId(story.Title);
 
-            //story.StoryTags = new List<StoryTag>();
-            //foreach (var tag in storyUpdateDto.Tags)
-            //{
-            //    story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
-            //}
+            // check if story.StoryTags is not null
+            if (story.StoryTags is null)
+            {
+                story.StoryTags = new List<StoryTag>();
+            }
+            // check if tags count is greater than 0 and then find if tags needs to be deleted...
+            if (story.StoryTags.Count > 0)
+            {
+                foreach (var storyTag in story.StoryTags)
+                {
+                    var tag = storyUpdateDto.Tags.FirstOrDefault(t => t.TagName == storyTag.TagName);
+                    if (tag is null)
+                    {
+                        story.StoryTags.Remove(storyTag);
+                    }
+                }
+            }
 
-            // to do - compare if old tag list is same with new and update acordingly....
+            // add tags if not exists
+            foreach (var tag in storyUpdateDto.Tags)
+            {
+                // check if tag already exist in story.StoryTags
+                var tagExists = story.StoryTags.Any(t => t.TagName == tag.TagName);
+                if (!tagExists)
+                {
+                    story.StoryTags.Add(new StoryTag { StoryId = story.Id, TagName = tag.TagName });
+                }
+            }
 
             try
             {
