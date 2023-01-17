@@ -21,7 +21,7 @@ namespace newsApi.Services.AdminService
         public async Task<ServiceResponse<CheckDomainReport>> CheckDomain(string domain)
         {
             var serviceResponse = new ServiceResponse<CheckDomainReport>();
-            var serviceResponseStories = await _storyService.GetStories(domain);
+            var serviceResponseStories = await _storyService.GetStories(domain, 1, 10); // TO DO CHANGE TO GET ALL STORIES
             var stories = await _context.Stories
                 .Include(s => s.ImageDbs)
                 .ToListAsync();

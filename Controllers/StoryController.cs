@@ -29,11 +29,11 @@ namespace newsApi.Controllers
             return CreatedAtRoute(nameof(GetStory), new { storyId = serviceResponse.Data }, serviceResponse);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetStories()
+        [HttpGet("admin-query")]
+        public async Task<IActionResult> GetStories([FromQuery] int page, int pageSize)
         {
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
-            var serviceResponse = await _storyService.GetStories(domainName);
+            var serviceResponse = await _storyService.GetStories(domainName, page, pageSize);
             if (!serviceResponse.Success)
             {
                 return BadRequest(serviceResponse);
