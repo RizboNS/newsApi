@@ -9,6 +9,8 @@ namespace newsApi.Services.StoryService
 
         Task<ServiceResponse<StoryResponsePagedDto>> GetStories(string domainName, int page, int pageSize);
 
+        Task<ServiceResponse<StoryResponsePagedDto>> SearchStories(string searchValue, int page, int pageSize, string domainName);
+
         Task<ServiceResponse<StoryResponseDto>> GetStory(Guid storyId, string domainName);
 
         Task<ServiceResponse<StoryResponseDto>> GetStoryByTitleId(string titleId, string domainName);

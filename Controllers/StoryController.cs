@@ -41,6 +41,18 @@ namespace newsApi.Controllers
             return Ok(serviceResponse);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchStories([FromQuery] string searchValue, int page, int pageSize)
+        {
+            var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
+            var serviceResponse = await _storyService.SearchStories(searchValue, page, pageSize, domainName);
+            if (!serviceResponse.Success)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
         [HttpGet("{storyId}", Name = "GetStory")]
         public async Task<IActionResult> GetStory(Guid storyId)
         {

@@ -235,6 +235,46 @@ namespace newsApi.Services.StoryService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<StoryResponsePagedDto>> SearchStories(string searchValue, int page, int pageSize, string domainName)
+        {
+            var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
+            var pageResult = (float)pageSize;
+
+            var stories = await _context.Stories
+                .Include(s => s.StoryTags)
+                .ThenInclude(st => st.Tag)
+                .Include(s => s.ImageDbs)
+                .Where(s => s.Title.Contains(searchValue) || s.HtmlData.Contains(searchValue))
+                .OrderByDescending(s => s.PublishTime)
+                .Skip((page - 1) * (int)pageResult)
+                .Take((int)pageResult)
+                .AsSplitQuery()
+                .ToListAsync();
+
+            var pageCount = Math.Ceiling(stories.Count() / pageResult);
+
+            serviceResponse.Data = new StoryResponsePagedDto
+            {
+                Stories = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories),
+                PageCount = (int)pageCount,
+                PageSize = (int)pageResult,
+                Page = page
+            };
+
+            foreach (var story in serviceResponse.Data.Stories)
+            {
+                if (story.ImageDbs != null)
+                {
+                    for (int i = 0; i < story.ImageDbs.Count; i++)
+                    {
+                        var imageLocation = story.ImageDbs[i];
+                        story.ImageDbs[i] = domainName + imageLocation;
+                    }
+                }
+            }
+            return serviceResponse;
+        }
+
         public async Task<ServiceResponse<StoryResponsePagedDto>> GetStoriesPaged(string type, int page, string domainName)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
