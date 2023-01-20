@@ -188,12 +188,10 @@ namespace newsApi.Services.StoryService
             return methodResponse;
         }
 
-        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStories(string domainName, int page, int pageSize)
+        public async Task<ServiceResponse<StoryResponsePagedDto>> GetStories(string domainName, int page, int pageSize, List<Category> categories, List<string> tags, string published)
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = (float)pageSize;
-
-            var pageCount = Math.Ceiling(_context.Stories.Count() / pageResult);
 
             try
             {
@@ -201,11 +199,14 @@ namespace newsApi.Services.StoryService
                     .Include(s => s.StoryTags)
                     .ThenInclude(st => st.Tag)
                     .Include(s => s.ImageDbs)
+                    .Where(s => categories.Count == 0 || categories.Contains(s.Category))
                     .OrderByDescending(s => s.PublishTime)
                     .Skip((page - 1) * (int)pageResult)
                     .Take((int)pageResult)
                     .AsSplitQuery()
                     .ToListAsync();
+
+                var pageCount = Math.Ceiling(stories.Count() / pageResult); // this one broke :)
 
                 serviceResponse.Data = new StoryResponsePagedDto
                 {
