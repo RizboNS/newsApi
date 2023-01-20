@@ -195,16 +195,39 @@ namespace newsApi.Services.StoryService
 
             try
             {
-                var stories = await _context.Stories
-                    .Include(s => s.StoryTags)
-                    .ThenInclude(st => st.Tag)
-                    .Include(s => s.ImageDbs)
-                    .Where(s => categories.Count == 0 || categories.Contains(s.Category))
-                    .OrderByDescending(s => s.PublishTime)
-                    .Skip((page - 1) * (int)pageResult)
-                    .Take((int)pageResult)
-                    .AsSplitQuery()
-                    .ToListAsync();
+                //var stories = await _context.Stories
+                //    .Include(s => s.StoryTags)
+                //    .ThenInclude(st => st.Tag)
+                //    .Include(s => s.ImageDbs)
+                //    .OrderByDescending(s => s.PublishTime)
+                //    .Skip((page - 1) * (int)pageResult)
+                //    .Take((int)pageResult)
+                //    .AsSplitQuery()
+                //    .ToListAsync();
+                List<Story> stories;
+                if (categories.Count == 0)
+                {
+                    stories = await _context.Stories
+                                .Include(s => s.StoryTags)
+                                .ThenInclude(st => st.Tag)
+                                .Include(s => s.ImageDbs)
+                                .OrderByDescending(s => s.PublishTime)
+                                .Skip((page - 1) * (int)pageResult)
+                                .Take((int)pageResult)
+                                .ToListAsync();
+                }
+                else
+                {
+                    stories = await _context.Stories
+                                .Include(s => s.StoryTags)
+                                .ThenInclude(st => st.Tag)
+                                .Include(s => s.ImageDbs)
+                                .Where(s => categories.Contains(s.Category))
+                                .OrderByDescending(s => s.PublishTime)
+                                .Skip((page - 1) * (int)pageResult)
+                                .Take((int)pageResult)
+                                .ToListAsync();
+                }
 
                 var pageCount = Math.Ceiling(stories.Count() / pageResult); // this one broke :)
 
