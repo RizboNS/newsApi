@@ -110,10 +110,6 @@ namespace newsApi.Services.TagService
         private async Task<List<Tag>> GetAllTags()
         {
             var tags = await _context.Tags.ToListAsync();
-            foreach (var tag in tags)
-            {
-                Console.WriteLine(tag.TagName);
-            }
             return tags;
         }
     }

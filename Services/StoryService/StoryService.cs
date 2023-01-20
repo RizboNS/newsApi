@@ -192,48 +192,35 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = (float)pageSize;
+            int pageCount;
 
             try
             {
-                //var stories = await _context.Stories
-                //    .Include(s => s.StoryTags)
-                //    .ThenInclude(st => st.Tag)
-                //    .Include(s => s.ImageDbs)
-                //    .OrderByDescending(s => s.PublishTime)
-                //    .Skip((page - 1) * (int)pageResult)
-                //    .Take((int)pageResult)
-                //    .AsSplitQuery()
-                //    .ToListAsync();
-                List<Story> stories;
-                if (categories.Count == 0)
+                IQueryable<Story> stories;
+                if (categories.Count() == 0)
                 {
-                    stories = await _context.Stories
-                                .Include(s => s.StoryTags)
-                                .ThenInclude(st => st.Tag)
-                                .Include(s => s.ImageDbs)
-                                .OrderByDescending(s => s.PublishTime)
-                                .Skip((page - 1) * (int)pageResult)
-                                .Take((int)pageResult)
-                                .ToListAsync();
-                }
+                    stories = _context.Stories;
+                    pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
+                } // TO DO SIMILAR FOR TAGS.
                 else
                 {
-                    stories = await _context.Stories
+                    stories = _context.Stories.Where(s => categories.Contains(s.Category));
+                    pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
+                }
+                stories = stories
                                 .Include(s => s.StoryTags)
                                 .ThenInclude(st => st.Tag)
                                 .Include(s => s.ImageDbs)
-                                .Where(s => categories.Contains(s.Category))
                                 .OrderByDescending(s => s.PublishTime)
                                 .Skip((page - 1) * (int)pageResult)
                                 .Take((int)pageResult)
-                                .ToListAsync();
-                }
+                                .AsSplitQuery();
 
-                var pageCount = Math.Ceiling(stories.Count() / pageResult); // this one broke :)
+                var result = await stories.ToListAsync();
 
                 serviceResponse.Data = new StoryResponsePagedDto
                 {
-                    Stories = _mapper.Map<List<Story>, List<StoryResponseDto>>(stories),
+                    Stories = _mapper.Map<List<Story>, List<StoryResponseDto>>(result),
                     PageCount = (int)pageCount,
                     PageSize = (int)pageResult,
                     Page = page
@@ -263,6 +250,7 @@ namespace newsApi.Services.StoryService
         {
             var serviceResponse = new ServiceResponse<StoryResponsePagedDto>();
             var pageResult = (float)pageSize;
+            var pageCount = (int)Math.Ceiling(_context.Stories.Where(s => s.Title.Contains(searchValue) || s.HtmlData.Contains(searchValue)).Count() / pageResult);
 
             var stories = await _context.Stories
                 .Include(s => s.StoryTags)
@@ -274,8 +262,6 @@ namespace newsApi.Services.StoryService
                 .Take((int)pageResult)
                 .AsSplitQuery()
                 .ToListAsync();
-
-            var pageCount = Math.Ceiling(stories.Count() / pageResult);
 
             serviceResponse.Data = new StoryResponsePagedDto
             {
