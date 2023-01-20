@@ -30,10 +30,16 @@ namespace newsApi.Controllers
         }
 
         [HttpGet("admin-query")]
-        public async Task<IActionResult> GetStories([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categories, [FromQuery] string tags, [FromQuery] string published = "all")
+        public async Task<IActionResult> GetStories([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? categories = null, [FromQuery] string? tags = null, [FromQuery] string? published = "all")
         {
-            var categoriesList = categories.Split(',').Select(c => (Category)Enum.Parse(typeof(Category), c)).ToList();
-            var tagsList = tags.Split(',').ToList();
+            if (categories is not null)
+            {
+                var categoriesList = categories.Split(',').Select(c => (Category)Enum.Parse(typeof(Category), c)).ToList();
+            }
+            if (tags is not null)
+            {
+                var tagsList = tags.Split(',').ToList();
+            }
 
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             var serviceResponse = await _storyService.GetStories(domainName, page, pageSize);
