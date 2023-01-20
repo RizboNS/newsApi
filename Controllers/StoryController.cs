@@ -30,8 +30,18 @@ namespace newsApi.Controllers
         }
 
         [HttpGet("admin-query")]
-        public async Task<IActionResult> GetStories([FromQuery] int page, int pageSize)
+        public async Task<IActionResult> GetStories([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int[]? categories = null, [FromQuery] string[]? tags = null, [FromQuery] string? published = "all")
         {
+            // Map categories to enum - doing it manually because I need categories nullable.
+            List<Category> cat = new List<Category>();
+            if (categories is not null)
+            {
+                foreach (var category in categories)
+                {
+                    cat.Add((Category)category);
+                }
+            }
+
             var domainName = new Uri($"{Request.Scheme}://{Request.Host}").AbsoluteUri;
             var serviceResponse = await _storyService.GetStories(domainName, page, pageSize);
             if (!serviceResponse.Success)
