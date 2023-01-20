@@ -200,13 +200,12 @@ namespace newsApi.Services.StoryService
                 if (categories.Count() == 0)
                 {
                     stories = _context.Stories;
-                    pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
                 } // TO DO SIMILAR FOR TAGS.
                 else
                 {
                     stories = _context.Stories.Where(s => categories.Contains(s.Category));
-                    pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
                 }
+                pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
                 stories = stories
                                 .Include(s => s.StoryTags)
                                 .ThenInclude(st => st.Tag)
