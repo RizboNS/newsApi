@@ -196,24 +196,55 @@ namespace newsApi.Services.StoryService
 
             try
             {
+                //IQueryable<Story> stories;
+                //if (categories.Count() == 0)
+                //{
+                //    stories = _context.Stories;
+                //}
+                //else
+                //{
+                //    stories = _context.Stories.Where(s => categories.Contains(s.Category));
+                //}
+                //pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
+                //stories = stories
+                //                .Include(s => s.StoryTags)
+                //                .ThenInclude(st => st.Tag)
+                //                .Include(s => s.ImageDbs)
+                //                .OrderByDescending(s => s.PublishTime)
+                //                .Skip((page - 1) * (int)pageResult)
+                //                .Take((int)pageResult)
+                //                .AsSplitQuery();
+
+                //var result = await stories.ToListAsync();
+
                 IQueryable<Story> stories;
-                if (categories.Count() == 0)
+
+                if (categories.Count() == 0 && tags.Count() == 0)
                 {
                     stories = _context.Stories;
-                } // TO DO SIMILAR FOR TAGS.
-                else
+                }
+                else if (categories.Count() > 0 && tags.Count() == 0)
                 {
                     stories = _context.Stories.Where(s => categories.Contains(s.Category));
                 }
+                else if (categories.Count() == 0 && tags.Count() > 0)
+                {
+                    stories = _context.Stories.Where(s => s.StoryTags.Any(st => tags.Contains(st.Tag.TagName)));
+                }
+                else
+                {
+                    stories = _context.Stories.Where(s => categories.Contains(s.Category) && s.StoryTags.Any(st => tags.Contains(st.Tag.TagName)));
+                }
+
                 pageCount = (int)Math.Ceiling(stories.Count() / pageResult);
                 stories = stories
-                                .Include(s => s.StoryTags)
-                                .ThenInclude(st => st.Tag)
-                                .Include(s => s.ImageDbs)
-                                .OrderByDescending(s => s.PublishTime)
-                                .Skip((page - 1) * (int)pageResult)
-                                .Take((int)pageResult)
-                                .AsSplitQuery();
+                            .Include(s => s.StoryTags)
+                            .ThenInclude(st => st.Tag)
+                            .Include(s => s.ImageDbs)
+                            .OrderByDescending(s => s.PublishTime)
+                            .Skip((page - 1) * (int)pageResult)
+                            .Take((int)pageResult)
+                            .AsSplitQuery();
 
                 var result = await stories.ToListAsync();
 
