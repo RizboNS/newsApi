@@ -11,6 +11,7 @@ namespace newsApi.Data
 
         public DbSet<ImageDb> ImageDbs => Set<ImageDb>();
         public DbSet<Story> Stories => Set<Story>();
+        public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
         public DbSet<Tag> Tags => Set<Tag>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
