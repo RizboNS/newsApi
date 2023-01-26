@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
 using newsApi.Dtos;
 using newsApi.Models;
@@ -21,6 +22,13 @@ namespace newsApi.Services.CalendarEventService
             var sp = new ServiceResponse<Guid>();
             var id = Guid.NewGuid();
 
+            if (await Exist(calendarEventDto.Title))
+            {
+                sp.Success = false;
+                sp.Message = "Event with the Tittle: - " + calendarEventDto.Title + " - Allready exists.";
+                return sp;
+            }
+
             var calendarEvent = _mapper.Map<CalendarEvent>(calendarEventDto);
             calendarEvent.Id = id;
             sp.Data = calendarEvent.Id;
@@ -36,6 +44,12 @@ namespace newsApi.Services.CalendarEventService
                 sp.Message = ex.Message;
             }
             return sp;
+        }
+
+        private async Task<bool> Exist(string title)
+        {
+            var ce = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Title == title);
+            return ce is null ? false : true;
         }
     }
 }
