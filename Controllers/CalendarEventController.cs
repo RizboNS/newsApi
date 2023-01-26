@@ -21,6 +21,10 @@ namespace newsApi.Controllers
         public async Task<IActionResult> CreateCalendarEvent([FromBody] CalendarEventDto calendarEventDto)
         {
             var serviceResponse = await _calendarEvent.CreateCalendarEvent(calendarEventDto);
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
             return Ok(serviceResponse);
         }
     }
