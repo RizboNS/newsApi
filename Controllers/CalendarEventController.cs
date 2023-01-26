@@ -10,9 +10,9 @@ namespace newsApi.Controllers
     [ApiController]
     public class CalendarEventController : ControllerBase
     {
-        private readonly ICalendarEvent _calendarEvent;
+        private readonly ICalendarEventService _calendarEvent;
 
-        public CalendarEventController(ICalendarEvent calendarEvent)
+        public CalendarEventController(ICalendarEventService calendarEvent)
         {
             _calendarEvent = calendarEvent;
         }

@@ -10,6 +10,7 @@ namespace newsApi
         {
             CreateMap<StoryCreatedDto, Story>();
             CreateMap<ImageDto, ImageDb>();
+            CreateMap<CalendarEventDto, CalendarEvent>();
             CreateMap<Story, StoryResponseDto>()
                 .ForMember(dto => dto.ImageDbs, opt => opt.MapFrom(s => s.ImageDbs.Select(ib => ib.LocationPath)))
                 .ForMember(dto => dto.TagNames, opt => opt.MapFrom(s => s.StoryTags.Select(st => st.Tag.TagValue)));

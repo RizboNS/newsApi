@@ -17,7 +17,7 @@ builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITagService, TagService>();
-builder.Services.AddScoped<ICalendarEvent, CalendarEvent>();
+builder.Services.AddScoped<ICalendarEventService, CalendarEventService>();
 builder.Services.AddCors(
     p =>
         p.AddPolicy("corspolicy",

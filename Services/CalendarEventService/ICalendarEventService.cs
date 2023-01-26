@@ -3,7 +3,7 @@ using newsApi.Models;
 
 namespace newsApi.Services.CalendarEventService
 {
-    public interface ICalendarEvent
+    public interface ICalendarEventService
     {
         Task<ServiceResponse<Guid>> CreateCalendarEvent(CalendarEventDto calendarEventDto);
     }
