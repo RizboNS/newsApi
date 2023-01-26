@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newsApi.Data;
 using newsApi.Services.AdminService;
+using newsApi.Services.CalendarEventService;
 using newsApi.Services.ImageService;
 using newsApi.Services.StoryService;
 using newsApi.Services.TagService;
@@ -16,6 +17,7 @@ builder.Services.AddScoped<IStoryService, StoryService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<ICalendarEvent, CalendarEvent>();
 builder.Services.AddCors(
     p =>
         p.AddPolicy("corspolicy",

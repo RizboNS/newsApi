@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using newsApi.Dtos;
 using newsApi.Models;
+using newsApi.Services.CalendarEventService;
 
 namespace newsApi.Controllers
 {
@@ -8,11 +10,18 @@ namespace newsApi.Controllers
     [ApiController]
     public class CalendarEventController : ControllerBase
     {
-        [HttpPost]
-        public async Task<IActionResult> CreateCalendarEvent([FromBody] CalendarEvent calendarEvent)
+        private readonly ICalendarEvent _calendarEvent;
+
+        public CalendarEventController(ICalendarEvent calendarEvent)
         {
-            Console.WriteLine(calendarEvent.Title);
-            return Ok();
+            _calendarEvent = calendarEvent;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCalendarEvent([FromBody] CalendarEventDto calendarEventDto)
+        {
+            var serviceResponse = await _calendarEvent.CreateCalendarEvent(calendarEventDto);
+            return Ok(serviceResponse);
         }
     }
 }
