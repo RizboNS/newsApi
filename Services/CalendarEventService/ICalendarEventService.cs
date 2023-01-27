@@ -9,6 +9,6 @@ namespace newsApi.Services.CalendarEventService
 
         Task<ServiceResponse<List<CalendarEvent>>> GetAllEvents();
 
-        Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(DateOnly startDate, DateOnly endDate);
+        Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(string startDate, string endDate);
     }
 }

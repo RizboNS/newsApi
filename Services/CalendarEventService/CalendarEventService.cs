@@ -67,18 +67,18 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
-        public async Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(DateOnly startDate, DateOnly endDate)
+        public async Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(string startDate, string endDate)
         {
             var sp = new ServiceResponse<List<CalendarEventResponseDto>>();
-            var startDateTime = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
-            var endDateTime = new DateTime(endDate.Year, endDate.Month, endDate.Day, 0, 0, 0);
 
             try
             {
+                var startDateTime = DateTime.Parse(startDate);
+                var endDateTime = DateTime.Parse(endDate);
                 var events = await _context.CalendarEvents.Where(ce => ce.DateAndTime.Date >= startDateTime && ce.DateAndTime.Date <= endDateTime).ToListAsync();
                 var dates = Enumerable.Range(0, (endDateTime - startDateTime).Days + 1)
                       .Select(d => startDateTime.AddDays(d))
-                      .Select(d => new DateOnly(d.Year, d.Month, d.Day))
+                      .Select(d => new DateTime(d.Year, d.Month, d.Day, 0, 0, 0))
                       .ToList();
 
                 foreach (var date in dates)

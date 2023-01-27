@@ -17,6 +17,17 @@ namespace newsApi.Controllers
             _calendarEvent = calendarEvent;
         }
 
+        [HttpGet("ByDates")]
+        public async Task<IActionResult> GetEventsByDates([FromQuery] string startDate, string endDate)
+        {
+            var serviceResponse = await _calendarEvent.GetByDates(startDate, endDate);
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
         [HttpGet("All")]
         public async Task<IActionResult> GetAllEvents()
         {
