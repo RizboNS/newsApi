@@ -67,6 +67,11 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
+        public Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(DateOnly startDate, DateOnly endDate)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task<bool> Exist(string title)
         {
             var ce = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Title == title);
