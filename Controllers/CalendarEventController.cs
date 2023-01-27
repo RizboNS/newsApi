@@ -17,6 +17,17 @@ namespace newsApi.Controllers
             _calendarEvent = calendarEvent;
         }
 
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllEvents()
+        {
+            var serviceResponse = await _calendarEvent.GetAllEvents();
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateCalendarEvent([FromBody] CalendarEventDto calendarEventDto)
         {
