@@ -46,9 +46,25 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
-        public Task<ServiceResponse<List<CalendarEvent>>> GetAllEvents()
+        public async Task<ServiceResponse<List<CalendarEvent>>> GetAllEvents()
         {
-            throw new NotImplementedException();
+            var sp = new ServiceResponse<List<CalendarEvent>>();
+            try
+            {
+                sp.Data = await _context.CalendarEvents.ToListAsync();
+                if (sp.Data.Count == 0)
+                {
+                    sp.Success = false;
+                    sp.Message = "No Events found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                sp.Success = false;
+                sp.Message = ex.Message;
+            }
+
+            return sp;
         }
 
         private async Task<bool> Exist(string title)
