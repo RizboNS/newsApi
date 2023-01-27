@@ -67,9 +67,39 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
-        public Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(DateOnly startDate, DateOnly endDate)
+        public async Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(DateOnly startDate, DateOnly endDate)
         {
-            throw new NotImplementedException();
+            var sp = new ServiceResponse<List<CalendarEventResponseDto>>();
+            var startDateTime = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
+            var endDateTime = new DateTime(endDate.Year, endDate.Month, endDate.Day, 0, 0, 0);
+
+            try
+            {
+                var events = await _context.CalendarEvents.Where(ce => ce.DateAndTime.Date >= startDateTime && ce.DateAndTime.Date <= endDateTime).ToListAsync();
+                var dates = Enumerable.Range(0, (endDateTime - startDateTime).Days + 1)
+                      .Select(d => startDateTime.AddDays(d))
+                      .Select(d => new DateOnly(d.Year, d.Month, d.Day))
+                      .ToList();
+
+                foreach (var date in dates)
+                {
+                    var tmpDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
+                    sp.Data = new List<CalendarEventResponseDto>
+                    {
+                        new CalendarEventResponseDto
+                        {
+                            Date = date,
+                            Events = events.Where(ce => ce.DateAndTime.Date == tmpDate).ToList()
+                        }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                sp.Success = false;
+                sp.Message = ex.Message;
+            }
+            return sp;
         }
 
         private async Task<bool> Exist(string title)
