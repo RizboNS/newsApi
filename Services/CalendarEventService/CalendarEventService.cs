@@ -81,17 +81,15 @@ namespace newsApi.Services.CalendarEventService
                       .Select(d => new DateTime(d.Year, d.Month, d.Day, 0, 0, 0))
                       .ToList();
 
+                sp.Data = new List<CalendarEventResponseDto>();
                 foreach (var date in dates)
                 {
                     var tmpDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
-                    sp.Data = new List<CalendarEventResponseDto>
+                    sp.Data.Add(new CalendarEventResponseDto
                     {
-                        new CalendarEventResponseDto
-                        {
-                            Date = date,
-                            Events = events.Where(ce => ce.DateAndTime.Date == tmpDate).ToList()
-                        }
-                    };
+                        Date = date,
+                        Events = events.Where(ce => ce.DateAndTime.Date == tmpDate).ToList()
+                    });
                 }
             }
             catch (Exception ex)
