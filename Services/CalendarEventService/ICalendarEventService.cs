@@ -10,5 +10,7 @@ namespace newsApi.Services.CalendarEventService
         Task<ServiceResponse<List<CalendarEvent>>> GetAllEvents();
 
         Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(string startDate, string endDate);
+
+        Task<ServiceResponse<Guid>> Delete(Guid id);
     }
 }

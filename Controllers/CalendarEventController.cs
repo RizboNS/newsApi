@@ -49,5 +49,16 @@ namespace newsApi.Controllers
             }
             return Ok(serviceResponse);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var serviceResponse = await _calendarEvent.Delete(id);
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
     }
 }

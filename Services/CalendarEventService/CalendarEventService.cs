@@ -46,6 +46,32 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
+        public async Task<ServiceResponse<Guid>> Delete(Guid id)
+        {
+            var sp = new ServiceResponse<Guid>();
+            try
+            {
+                var calendarEvent = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Id == id);
+                if (calendarEvent is not null)
+                {
+                    _context.Remove(calendarEvent);
+                    await _context.SaveChangesAsync();
+                    sp.Data = id;
+                }
+                else
+                {
+                    sp.Success = false;
+                    sp.Message = "Event with the Id: - " + id + " - does not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                sp.Success = false;
+                sp.Message = ex.Message;
+            }
+            return sp;
+        }
+
         public async Task<ServiceResponse<List<CalendarEvent>>> GetAllEvents()
         {
             var sp = new ServiceResponse<List<CalendarEvent>>();
