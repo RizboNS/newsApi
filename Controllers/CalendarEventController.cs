@@ -71,5 +71,16 @@ namespace newsApi.Controllers
             }
             return Ok(serviceResponse);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var serviceResponse = await _calendarEvent.GetById(id);
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
     }
 }
