@@ -126,9 +126,24 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
-        public Task<ServiceResponse<CalendarEvent>> GetById(Guid id)
+        public async Task<ServiceResponse<CalendarEvent>> GetById(Guid id)
         {
-            throw new NotImplementedException();
+            var sp = new ServiceResponse<CalendarEvent>();
+            try
+            {
+                sp.Data = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Id == id);
+                if (sp.Data is null)
+                {
+                    sp.Success = false;
+                    sp.Message = "Event with the Id: - " + id + " - does not exist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                sp.Success = false;
+                sp.Message = ex.Message;
+            }
+            return sp;
         }
 
         public async Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent)
