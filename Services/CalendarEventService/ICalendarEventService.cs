@@ -12,5 +12,7 @@ namespace newsApi.Services.CalendarEventService
         Task<ServiceResponse<List<CalendarEventResponseDto>>> GetByDates(string startDate, string endDate);
 
         Task<ServiceResponse<Guid>> Delete(Guid id);
+
+        Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent);
     }
 }

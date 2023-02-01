@@ -126,6 +126,34 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
+        public async Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent)
+        {
+            var sp = new ServiceResponse<CalendarEvent>();
+            try
+            {
+                var calendarEventFromDb = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Id == id);
+                if (calendarEventFromDb is null)
+                {
+                    sp.Success = false;
+                    sp.Message = "Calendar Event with id: " + calendarEvent.Id + " not found.";
+                    return sp;
+                }
+                calendarEventFromDb.Title = calendarEvent.Title;
+                calendarEventFromDb.Content = calendarEvent.Content;
+                calendarEventFromDb.DateAndTime = calendarEvent.DateAndTime;
+                calendarEventFromDb.Type = calendarEvent.Type;
+
+                await _context.SaveChangesAsync();
+                sp.Data = calendarEventFromDb;
+            }
+            catch (Exception ex)
+            {
+                sp.Success = false;
+                sp.Message = ex.Message;
+            }
+            return sp;
+        }
+
         private async Task<bool> Exist(string title)
         {
             var ce = await _context.CalendarEvents.FirstOrDefaultAsync(ce => ce.Title == title);
