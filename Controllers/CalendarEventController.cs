@@ -60,5 +60,16 @@ namespace newsApi.Controllers
             }
             return Ok(serviceResponse);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Updated(Guid id, [FromBody] CalendarEvent calendarEvent)
+        {
+            var serviceResponse = await _calendarEvent.Updated(id, calendarEvent);
+            if (serviceResponse.Success == false)
+            {
+                return BadRequest(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
     }
 }
