@@ -126,6 +126,11 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
+        public Task<ServiceResponse<CalendarEvent>> GetById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent)
         {
             var sp = new ServiceResponse<CalendarEvent>();

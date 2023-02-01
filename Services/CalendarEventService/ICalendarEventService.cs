@@ -14,5 +14,7 @@ namespace newsApi.Services.CalendarEventService
         Task<ServiceResponse<Guid>> Delete(Guid id);
 
         Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent);
+
+        Task<ServiceResponse<CalendarEvent>> GetById(Guid id);
     }
 }
