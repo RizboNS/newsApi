@@ -62,9 +62,9 @@ namespace newsApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Updated(Guid id, [FromBody] CalendarEvent calendarEvent)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CalendarEvent calendarEvent)
         {
-            var serviceResponse = await _calendarEvent.Updated(id, calendarEvent);
+            var serviceResponse = await _calendarEvent.Update(id, calendarEvent);
             if (serviceResponse.Success == false)
             {
                 return BadRequest(serviceResponse);

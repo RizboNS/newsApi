@@ -146,7 +146,7 @@ namespace newsApi.Services.CalendarEventService
             return sp;
         }
 
-        public async Task<ServiceResponse<CalendarEvent>> Updated(Guid id, CalendarEvent calendarEvent)
+        public async Task<ServiceResponse<CalendarEvent>> Update(Guid id, CalendarEvent calendarEvent)
         {
             var sp = new ServiceResponse<CalendarEvent>();
             try
